@@ -6,6 +6,7 @@ SRCS = $(OBJS:.o = .c)
 MAIN = main
 
 # AVXFLAGS = -mavx512vnni -mavx512vl -mavx512f 
+AVXFLAGS = -march=native -O3
 
 help:
 	@echo "help!"
