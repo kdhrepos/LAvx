@@ -1,5 +1,5 @@
 #ifndef UTIL_H
-#define UTIL_H
+#define UTIL_H 1
 
 #pragma once
 
@@ -8,6 +8,8 @@
 #include <time.h>
 #include <assert.h>
 #include <stdint.h>
+#include <math.h>
+#include <argp.h>
 
 typedef short BOOL;
 #define TRUE 1
@@ -19,19 +21,25 @@ typedef short BOOL;
 #define FP32_VEC_DIM(vec) ((sizeof(vec))/(sizeof(float)))
 #define FP64_VEC_DIM(vec) ((sizeof(vec))/(sizeof(double)))
 
-/* This was for vector */
+// #define ROW(mat) ((sizeof(mat[0]))/(sizeof(mat[0][0])))
+// #define COL(mat) ((sizeof(mat[0]))/(sizeof(mat[0][0])))
+
+/* This was for 1-dim array, vector */
 // #define GET_RANDOM(vec, dim)                \
 //     do {                                    \
 //         for (int i = 0; i < (dim); i++)     \
 //             (vec)[i] = ((rand()) % (20));   \
 //     } while (0)                             \
 
-#define GET_RANDOM(mat, row, col)                   \
-    do {                                            \
-        for (int (r) = 0; (r) < (row); (r)++)       \
-            for (int (c) = 0; (c) < (col); (c)++)   \
-                    (mat)[(r)][(c)] = ((rand()) % (20)); \
-    } while (0)                                     \
+#define GET_RANDOM(bound, mat, row, col)                           \
+    do {                                                    \
+        for (int (r) = 0; (r) < (row); (r)++)               \
+            for (int (c) = 0; (c) < (col); (c)++)           \
+                    (mat)[(r)][(c)] = ((rand()) % (bound));    \
+    } while (0)                                             \
+
+#define print(row, col, mat)    \
+    _Generic((mat), float:fp32_print, double:fp64_print)(row, col, mat)   \
 
 typedef int OP;
 enum {ADD, MUL, DP};
@@ -62,4 +70,29 @@ void test(int row_a, int col_a, int row_b, int col_b,
 
 }
 
+#define mat_print(row, col, mat) \
+    _Generic((mat), \
+        float (*)[(col)]: fp32_print, \
+        double (*)[(col)]: fp64_print \
+    )(row, col, mat) \
+
+void fp32_print(int row, int col, float mat[row][col]) {
+    printf("FP32 Print\n");
+    for(int r=0; r<row; r++) {
+        for (int c=0; c<col; c++) 
+            printf("%f ", mat[r][c]);
+        printf("\n");
+    }
+    printf("\n");
+}
+
+void fp64_print(int row, int col, double mat[row][col]) {
+    printf("FP64 Print\n");
+    for(int r=0; r<row; r++) {
+        for (int c=0; c<col; c++) 
+            printf("%lf ", mat[r][c]);
+        printf("\n");
+    }
+    printf("\n");
+}
 #endif
