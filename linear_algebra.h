@@ -335,60 +335,66 @@ double** fp64_mat_mul(int row_a, int col_a, int row_b, int col_b,
         double (*)[(col)]: fp64_l1_norm)   \
         (row, col, vec) \
 
-double fp32_l1_norm(int row, int col, float vec[row][col]) {
+float fp32_l1_norm(int row, int col, float vec[row][col]) {
     /* Vector dimension check */
     assert((row > 0 && col > 0) && "Dimensions must be greater than zero");
     assert((row == 1 && col >= 1) && "Only row vectors are allowed");
 
     int quotient = col / AVX_FP32;
     int remainder = col % AVX_FP32;
-    double l2_norm = 0.0;
+    float l1_norm = 0.0;
     
     #if INSTLEVEL >= 6 /* AVX */
-    int c=0;
-    for(; c<(col - remainder); c+=AVX_FP32) {
-        __m256 avx = _mm256_loadu_ps(&vec[0][c]);
-        /* reduce sum */
-        __m256 sum = _mm256_mul_ps(avx, avx);   
-               sum = _mm256_hadd_ps(sum, sum);
-               sum = _mm256_hadd_ps(sum, sum);
+    __m256 ymm_sign = _mm256_set1_ps(-0.0f); /* 1000000000...000 */
 
-        __m128 sum_high = _mm256_extractf128_ps(sum, 1); /* extract values at highest index */
-        __m128 result = _mm_add_ps(sum_high, _mm256_castps256_ps128(sum));
-
-        l2_norm += _mm_cvtss_f32(result); /* extract lowest value from register */
+    for(int r=0; r<row; r++) {
+        int c=0;
+        for(; c<(col-remainder); c+=AVX_FP32) {
+            __m256 ymm_vector = _mm256_loadu_ps(&vec[0][c]);            
+            __m256 ymm_rslt   = _mm256_andnot_ps(ymm_sign, ymm_vector); /* !ymm_sign: 0111...111 */
+                                                                        /* ymm_vector stays same */
+            __m256  sum = _mm256_hadd_ps(ymm_rslt, ymm_rslt);
+                    sum = _mm256_hadd_ps(sum, sum);
+            __m128 sum_high = _mm256_extractf128_ps(sum, 1); /* extract values at highest index */
+            __m128 result = _mm_add_ps(sum_high, _mm256_castps256_ps128(sum));
+        
+            l1_norm += _mm_cvtss_f32(result); /* extract lowest value from register */;
+        }
+        for(; c<col; c++) 
+            l1_norm += (vec[0][c] > 0 ? vec[0][c] : -vec[0][c]); /* add leftovers (remained values) */
     }
-    for(; c<col; c++) l2_norm += (pow(vec[0][c], 2.0)); /* add leftovers (remained values) */
-
-    return sqrt(l2_norm);
+    return l1_norm;
     #endif
 }
 
-long double fp64_l1_norm(int row, int col, double vec[row][col]) {
+double fp64_l1_norm(int row, int col, double vec[row][col]) {
     /* Vector dimension check */
     assert((row > 0 && col > 0) && "Dimensions must be greater than zero");
     assert((row == 1 && col >= 1) && "Only row vectors are allowed");
 
     int quotient = col / AVX_FP64;
     int remainder = col % AVX_FP64;
-    long double l2_norm = 0.0;
+    double l1_norm = 0.0;
     
     #if INSTLEVEL >= 6 /* AVX */
-    int c=0;
-    for(; c<(col - remainder); c+=AVX_FP64) {
-        __m256d avx = _mm256_loadu_pd(&vec[0][c]);
-        /* reduce sum */
-        __m256d sum = _mm256_mul_pd(avx, avx);
-                sum = _mm256_hadd_pd(sum, sum);
+    __m256d ymm_sign = _mm256_set1_pd(-0.0f); /* 1000000000...000 */
 
-        __m128d sum_high = _mm256_extractf128_pd(sum, 1); /* extract values at highest index */
-        __m128d result = _mm_add_pd(sum_high, _mm256_castpd256_pd128(sum));
-
-        l2_norm += _mm_cvtsd_f64(result); /* extract lowest value from register */
+    for(int r=0; r<row; r++) {
+        int c=0;
+        for(; c<(col-remainder); c+=AVX_FP64) {
+            __m256d ymm_vector = _mm256_loadu_pd(&vec[0][c]);            
+            __m256d ymm_rslt   = _mm256_andnot_pd(ymm_sign, ymm_vector); /* !ymm_sign: 0111...111 */
+                                                                        /* ymm_vector stays same */
+            __m256d  sum = _mm256_hadd_pd(ymm_rslt, ymm_rslt);
+            __m128d sum_high = _mm256_extractf128_pd(sum, 1); /* extract values at highest index */
+            __m128d result = _mm_add_pd(sum_high, _mm256_castpd256_pd128(sum));
+        
+            l1_norm += _mm_cvtsd_f64(result); /* extract lowest value from register */;
+        }
+        for(; c<col; c++) 
+            l1_norm += (vec[0][c] > 0 ? vec[0][c] : -vec[0][c]); /* add leftovers (remained values) */
     }
-    for(; c<col; c++) l2_norm += (pow(vec[0][c], 2.0)); /* add leftovers (remained values) */
-
-    return sqrt(l2_norm);
+    return l1_norm;
     #endif
 }
 

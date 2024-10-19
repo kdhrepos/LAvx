@@ -31,7 +31,7 @@ typedef short BOOL;
 //             (vec)[i] = ((rand()) % (20));   \
 //     } while (0)                             \
 
-#define GET_RANDOM(bound, mat, row, col)                           \
+#define GET_RANDOM(row, col, mat, bound)                           \
     do {                                                    \
         for (int (r) = 0; (r) < (row); (r)++)               \
             for (int (c) = 0; (c) < (col); (c)++)           \
