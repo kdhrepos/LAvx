@@ -16,6 +16,12 @@
 *
 *****************************************************************************/
 
+#define mat_add(row_a, col_a, row_b, col_b, mat_a, mat_b) \ 
+    _Generic((mat_a), \
+    float   (*)[(col)]: fp32_mat_add,   \
+    double  (*)[(col)]: fp64_mat_add    \
+    ) (row_a, col_a, row_b, col_b, mat_a, mat_b)   \
+
 void int32_mat_add(int32_t** mat_a, int32_t** mat_b, int32_t** mat_c,
                    int row_a, int col_a, int row_b, int col_b) {
     /* matrix dimension check */
@@ -225,13 +231,65 @@ void fp64_scalar_mul(int row, int col, double mat[row][col], double scalar) {
         double (*)[col_a]: fp64_mat_mul)   \
         (row_a, col_a, row_b, col_b, mat_a, mat_b) \
 
-double** fp32_mat_mul(int row_a, int col_a, int row_b, int col_b,
+float** fp32_mat_mul(int row_a, int col_a, int row_b, int col_b,
             float mat_a[row_a][col_a], float mat_b[row_b][col_b]) {
     /* matrix dimension check */
     assert((row_a > 0 && row_b > 0 && col_a > 0 && col_b > 0) 
             && "Dimensions must be greater than zero");
     assert(((row_a == row_b) && (col_a == col_b)) 
             && "Dimensions of two matrices are not valid");
+
+    /* allocation of new matrix */
+    // TODO: Need to do initialize mat_c with 0
+    float** mat_c = (float **)malloc(sizeof(float) * (row_a));
+    for(int row=0; row<row_a; row++) 
+        mat_c[row] = (float *)malloc(sizeof(float) * (col_b));
+    
+    int quotient = col_b / AVX_FP32;
+    int remainder = col_b % AVX_FP32;
+    
+    #if INSTLEVEL >= 6 /* AVX */
+    __m256i mask;
+    __m256 sum;
+    if(remainder == 0)      mask = _mm256_set_epi32(0, 0, 0, 0, 0, 0, 0, 0);
+    else if(remainder == 1) mask = _mm256_set_epi32(0, 0, 0, 0, 0, 0, 0, -1);
+    else if(remainder == 2) mask = _mm256_set_epi32(0, 0, 0, 0, 0, 0, -1, -1);
+    else if(remainder == 3) mask = _mm256_set_epi32(0, 0, 0, 0, 0, -1, -1, -1);
+    else if(remainder == 4) mask = _mm256_set_epi32(0, 0, 0, 0, -1, -1, -1, -1);
+    else if(remainder == 5) mask = _mm256_set_epi32(0, 0, 0, -1, -1, -1, -1, -1);
+    else if(remainder == 6) mask = _mm256_set_epi32(0, 0, -1, -1, -1, -1, -1, -1);
+    else if(remainder == 7) mask = _mm256_set_epi32(0, -1, -1, -1, -1, -1, -1, -1);
+
+    for(int r=0; r<row_a; r++) {
+        int c=0;
+        for(; c<(col_b - remainder); c+=AVX_FP64) {
+            sum = _mm256_setzero_ps();
+            for(int k=0; k<col_a; k++) {
+                __m256 scalar = _mm256_set1_ps(mat_a[r][k]); /* one element of first matrix */
+                __m256 vector = _mm256_loadu_ps(&mat_b[k][c]); /* one row of second matrix */
+                __m256 result = _mm256_mul_ps(scalar, vector); /* scalar * vector multiplication */
+                sum = _mm256_add_ps(sum, result); /* stacking partial sum */
+            }
+            _mm256_storeu_ps(&mat_c[r][c], sum);
+        }
+        // TODO: Optimization for remained elements
+        sum = _mm256_setzero_ps();
+        for(int k=0; k<col_a; k++) {
+            __m256 scalar = _mm256_set1_ps(mat_a[r][k]); /* one element of first matrix */
+            __m256 vector = _mm256_maskload_ps(&mat_b[k][c], mask); /* one row of second matrix */
+            __m256 result = _mm256_mul_ps(scalar, vector); /* scalar * vector multiplication */
+            sum = _mm256_add_ps(sum, result); /* stacking partial sum */
+        }
+        _mm256_maskstore_ps(&mat_c[r][c], mask, sum);
+    }
+    return mat_c;
+    #else /* No SIMD Extension -> Scalar */
+    for(int r=0; r<row_a; r++) 
+        for(int c=0; c<col_b; c++)
+            for(int k=0; k<col_a; k++) 
+                mat_c[r][c] += (mat_a[r][k] * mat_b[k][c]);
+    return mat_c;
+    #endif
 }
 
 /** 
@@ -257,11 +315,17 @@ double** fp64_mat_mul(int row_a, int col_a, int row_b, int col_b,
     for(int row=0; row<row_a; row++) 
         mat_c[row] = (double *)malloc(sizeof(double) * (col_b));
 
-    int num_a = row_a * col_a, num_b = row_b * col_b;
     int quotient = col_b / AVX_FP64;
     int remained = col_b % AVX_FP64;
 
     #if INSTLEVEL >= 6 /* AVX */
+    __m256i mask;
+    __m256d sum;
+    if(remained == 0) mask = _mm256_set_epi64x(0, 0, 0, 0);
+    else if(remained == 1) mask = _mm256_set_epi64x(0, 0, 0, -1);
+    else if(remained == 2) mask = _mm256_set_epi64x(0, 0, -1, -1);
+    else if(remained == 3) mask = _mm256_set_epi64x(0, -1, -1, -1);
+
     for(int r=0; r<row_a; r++) {
         for(int c=0; c<(col_b - remained); c+=AVX_FP64) {
             __m256d sum = _mm256_setzero_pd();
@@ -275,12 +339,7 @@ double** fp64_mat_mul(int row_a, int col_a, int row_b, int col_b,
         }
         // TODO: Optimization for remained elements
         int c = quotient * AVX_FP64;
-        __m256i mask;
-        if(remained == 0) mask = _mm256_set_epi64x(0, 0, 0, 0);
-        if(remained == 1) mask = _mm256_set_epi64x(0, 0, 0, -1);
-        if(remained == 2) mask = _mm256_set_epi64x(0, 0, -1, -1);
-        if(remained == 3) mask = _mm256_set_epi64x(0, -1, -1, -1);
-        __m256d sum = _mm256_setzero_pd();
+        sum = _mm256_setzero_pd();
         for(int k=0; k<col_a; k++) {
             __m256d scalar = _mm256_set1_pd(mat_a[r][k]); /* one element of first matrix */
             __m256d vector = _mm256_maskload_pd(&mat_b[k][c], mask); /* one row of second matrix */
@@ -314,7 +373,7 @@ double** fp64_mat_mul(int row_a, int col_a, int row_b, int col_b,
     //     }
     // }
     return mat_c;
-    #else /* Scalar, No SIMD Extension*/
+    #else /* No SIMD Extension -> Scalar */
     for(int r=0; r<row_a; r++) 
         for(int c=0; c<col_b; c++)
             for(int k=0; k<col_a; k++) 
@@ -461,36 +520,43 @@ long double fp64_l2_norm(int row, int col, double vec[row][col]) {
     #endif
 }
 
-void fp32_vec_dp(float* vec_a, float* vec_b, float* result, int dim_a, int dim_b) {
+/*****************************************************************************
+*
+*          Vector Dot Product
+*
+*****************************************************************************/
+
+double fp32_vec_dp(int row_a, int col_a, int row_b, int col_b, 
+                    float vec_a[row_a][col_a], float vec_b[row_b][col_b]) {
     /* vector dimension check */
-    assert((dim_a > 0 && dim_b > 0) && "Dimensions must be greater than zero");
-    assert(((dim_a == dim_b)) && "Dimensions of two vector are not valid");
+    assert((row_a > 0 && col_a > 0) && "Dimensions must be greater than zero");
+    assert((row_a >= 1 && col_a == 1) && "Only column vectors are allowed");
+    assert((row_b >= 1 && col_b == 1) && "Only column vectors are allowed");
+    assert((row_a == row_b && col_a == col_b) && "Two vectors must have same dimension");
+
+    int quotient    = row_a / AVX_FP32;
+    int remainder   = row_a % AVX_FP32;
+    double result = 0.0;
 
     #if INSTLEVEL >= 6
-    for (int i = 0; i < dim_a; i += 8) 
+    int r=0;
+    for (; r < (row_a - remainder); r += AVX_FP32) 
     {
-        __m256 avx_a = _mm256_loadu_ps(&vec_a[i]);
-        __m256 avx_b = _mm256_loadu_ps(&vec_b[i]);
+        __m256 avx_a = _mm256_set_ps(vec_a[r][0], vec_a[r+1][0], vec_a[r+2][0], vec_a[r+3][0], 
+                                     vec_a[r+4][0], vec_a[r+5][0], vec_a[r+6][0], vec_a[r+7][0]);
+        __m256 avx_b = _mm256_set_ps(vec_b[r][0], vec_b[r+1][0], vec_b[r+2][0], vec_b[r+3][0], 
+                                     vec_b[r+4][0], vec_b[r+5][0], vec_b[r+6][0], vec_b[r+7][0]);
         
         __m256 avx_result = _mm256_dp_ps(avx_a, avx_b, 0xFF);
 
-        float dp_result = (((float*)(&avx_result))[0] +((float*)(&avx_result))[4]);
-
-        (*result) += dp_result;
+        result += (((float*)(&avx_result))[0] +((float*)(&avx_result))[4]);
     }
-
-    // __m256 avx_a = _mm256_loadu_ps(vec_a);
-    // __m256 avx_b = _mm256_loadu_ps(vec_b);
-    
-    // __m256 avx_result = _mm256_dp_ps(avx_a, avx_b, 0xFF);
-
-    // float dp_result = (((float*)(&avx_result))[0] +((float*)(&avx_result))[4]);
-
-    // (*result) += dp_result;
-    // #elif INSTLEVEL <= 0
-    // #error No SIMD instruction set is available
+    for(; r < row_a; r++)
+        result += (vec_a[r][0] * vec_b[r][0]);
+    return result;
     #endif
 }
+
 // void cross_product();
 
 #endif
