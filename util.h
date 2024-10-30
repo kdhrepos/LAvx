@@ -5,9 +5,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
+#include <memory.h>
 #include <time.h>
 #include <assert.h>
-#include <stdint.h>
 #include <math.h>
 #include <argp.h>
 
@@ -31,7 +32,7 @@ typedef short BOOL;
 //             (vec)[i] = ((rand()) % (20));   \
 //     } while (0)                             \
 
-#define GET_RANDOM(row, col, mat, bound)                           \
+#define RANDOM_MATRIX(row, col, mat, bound)                           \
     do {                                                    \
         for (int (r) = 0; (r) < (row); (r)++)               \
             for (int (c) = 0; (c) < (col); (c)++)           \
@@ -80,7 +81,7 @@ void fp32_print(int row, int col, float mat[row][col]) {
     printf("FP32 Print\n");
     for(int r=0; r<row; r++) {
         for (int c=0; c<col; c++) 
-            printf("%f ", mat[r][c]);
+            printf("%5.2f ", mat[r][c]);
         printf("\n");
     }
     printf("\n");
@@ -90,7 +91,7 @@ void fp64_print(int row, int col, double mat[row][col]) {
     printf("FP64 Print\n");
     for(int r=0; r<row; r++) {
         for (int c=0; c<col; c++) 
-            printf("%lf ", mat[r][c]);
+            printf("%5.2lf ", mat[r][c]);
         printf("\n");
     }
     printf("\n");
