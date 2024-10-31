@@ -5,7 +5,7 @@ OBJS = main.o \
 SRCS = $(OBJS:.o = .c)
 
 TEST_DIR = test/
-# TEST = 
+TEST = fp32 fp64 int32
 
 # AVXFLAGS = -mavx512vnni -mavx512vl -mavx512f 
 FLAGS = -std=c11 -march=native -O3
@@ -32,4 +32,4 @@ fp64:
 # 	rm 
 
 clean :
-	rm $(OBJS)
+	rm $(TEST)
