@@ -16,8 +16,8 @@ typedef short BOOL;
 #define TRUE 1
 #define FALSE 0
 
-#define AVX_FP64 4
-#define AVX_FP32 8
+#define ROW 10
+#define COL 10
 
 #define FP32_VEC_DIM(vec) ((sizeof(vec))/(sizeof(float)))
 #define FP64_VEC_DIM(vec) ((sizeof(vec))/(sizeof(double)))
@@ -40,7 +40,10 @@ typedef short BOOL;
     } while (0)                                             \
 
 #define print(row, col, mat)    \
-    _Generic((mat), float:fp32_print, double:fp64_print)(row, col, mat)   \
+    _Generic((mat), \ 
+            float:fp32_print, \
+            double:fp64_print)  \
+            (row, col, mat)   \
 
 typedef int OP;
 enum {ADD, MUL, DP};
@@ -73,9 +76,20 @@ void test(int row_a, int col_a, int row_b, int col_b,
 
 #define mat_print(row, col, mat) \
     _Generic((mat), \
+        int32_t (*)[(col)]: int32_print, \
         float (*)[(col)]: fp32_print, \
         double (*)[(col)]: fp64_print \
     )(row, col, mat) \
+
+void int32_print(int row, int col, int32_t mat[row][col]) {
+    printf("INT32 Print\n");
+    for(int r=0; r<row; r++) {
+        for (int c=0; c<col; c++) 
+            printf("%d ", mat[r][c]);
+        printf("\n");
+    }
+    printf("\n");
+}
 
 void fp32_print(int row, int col, float mat[row][col]) {
     printf("FP32 Print\n");
