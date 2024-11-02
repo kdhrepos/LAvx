@@ -28,24 +28,35 @@
         double (*)[Ac]: fp64_mat_mul)   \
         (Ar, Ac, Br, Bc, A, B) \
 
+/**
+ * Layered Approach
+ * 
+ * @ref - Anatomy of High-Performance Matrix Multiplication, Goto et. al.
+ */
+void gepp();    /* Panel x Panel */
+void gemp();    /* Matrix x Panel */
+void gepm();    /* Panel x Matrix */
+void gebp();    /* Block x Panel */
+void gepb();    /* Panel x Block */
+void gepdot();  /* Panel x Panel = Dot*/
+void gebb();    /* Block x Block */
+
 int16_t int16_mat_mul(int Ar, int Ac, int Br, int Bc,
             int16_t A[Ar][Ac], int16_t B[Br][Bc]) {
-    GEMM_VALID_DIM_CHECK(Ar, Ac, Br, Bc);
-    GEMM_ZERO_DIM_CHECK(Ar, Ac, Br, Bc);
+    GEMM_INPUT_VALID_CHECK(Ar, Ac, Br, Bc);
+    GEMM_INPUT_ZERO_CHECK(Ar, Ac, Br, Bc);
 
     
 }
 
-int32_t** int32_mat_mul(int Ar, int Ac, int Br, int Bc,
-            int32_t A[Ar][Ac], int32_t B[Br][Bc]) {
-    GEMM_VALID_DIM_CHECK(Ar, Ac, Br, Bc);
-    GEMM_ZERO_DIM_CHECK(Ar, Ac, Br, Bc);
-
-    int32_t** C = (int32_t **)malloc(sizeof(int32_t*) * (Ar));
-    for(int row=0; row<Ar; row++) 
-        C[row] = (int32_t *)malloc(sizeof(int32_t) * (Bc));
+void int32_gemm(const int Ar, const int Ac, const int Br, const int Bc,
+            const int32_t* A, const int32_t* B, int32_t* C) {
+    GEMM_INPUT_VALID_CHECK(Ar, Ac, Br, Bc);
+    GEMM_INPUT_ZERO_CHECK(Ar, Ac, Br, Bc);
 
     #if INSTLEVEL >= 7 /* AVX2 */
+
+    // #elif INSTLEVEL >= 6 /* AVX */
     int quotient = Bc / B32_YMM;
     int remainder = Bc % B32_YMM;
     __m256i mask, C_sum;
@@ -63,44 +74,40 @@ int32_t** int32_mat_mul(int Ar, int Ac, int Br, int Bc,
         for(; c<(Bc - remainder); c+=B32_YMM) {
             C_sum = _mm256_setzero_si256();
             for(int k=0; k<Ac; k++) {
-                __m256i A_val = _mm256_set1_epi32(A[r][k]); /* one element of first matrix */
-                __m256i B_vec = _mm256_loadu_si256(&B[k][c]); /* one row of second matrix */
+                __m256i A_val = _mm256_set1_epi32(A[r*Ac + k]); /* one element of first matrix */
+                __m256i B_vec = _mm256_loadu_si256(&B[k*Bc + c]); /* one row of second matrix */
                 __m256i C_vec = _mm256_mullo_epi32(A_val, B_vec); /* scalar * vector multiplication */
                 C_sum = _mm256_add_epi32(C_sum, C_vec); /* stacking partial sum */
             }
-            _mm256_storeu_si256(&C[r][c], C_sum);
+            _mm256_storeu_si256(&C[r*Br + c], C_sum);
         }
         // TODO: Optimization for remainder elements
         C_sum = _mm256_setzero_si256();
         for(int k=0; k<Ac; k++) {
-            __m256i A_val = _mm256_set1_epi32(A[r][k]); /* one element of first matrix */
-            __m256i B_vec = _mm256_maskload_epi32(&B[k][c], mask); /* one row of second matrix */
+            __m256i A_val = _mm256_set1_epi32(A[r*Ac + k]); /* one element of first matrix */
+            __m256i B_vec = _mm256_maskload_epi32(&B[k*Bc + c], mask); /* one row of second matrix */
             __m256i C_vec = _mm256_mullo_epi32(A_val, B_vec); /* scalar * vector multiplication */
             C_sum = _mm256_add_epi32(C_sum, C_vec); /* stacking partial sum */
         }
-        _mm256_maskstore_epi32(&C[r][c], mask, C_sum);
+        _mm256_maskstore_epi32(&C[r*Br + c], mask, C_sum);
     }
-    return C;
     #elif INSTLEVEL >= 5 /* AVX, SSE4 */
 
     #endif
 }
 
-float** fp32_mat_mul(int Ar, int Ac, int Br, int Bc,
-            float A[Ar][Ac], float B[Br][Bc]) {
-    GEMM_VALID_DIM_CHECK(Ar, Ac, Br, Bc);
-    GEMM_ZERO_DIM_CHECK(Ar, Ac, Br, Bc);
+// #define gemm(Ar, Ac, Br, Bc, A, B, C) _Generic((A)  \
+//     float* : fp32_gemm \
+//     )(Ar, Ac, Br, Bc, A, B, C)  \
 
-    /* allocation of new matrix */
-    // TODO: Need to optimize memory allocation logic
-    float** C = (float **)malloc(sizeof(float*) * (Ar));
-    for(int row=0; row<Ar; row++) 
-        C[row] = (float *)malloc(sizeof(float) * (Bc));
-    
+void fp32_gemm(const int Ar, const int Ac, const int Br, const int Bc,
+            const float* A, const float* B, float* C) {
+    GEMM_INPUT_VALID_CHECK(Ar, Ac, Br, Bc);
+    GEMM_INPUT_ZERO_CHECK(Ar, Ac, Br, Bc);
+
     #if INSTLEVEL >= 7 /* AVX2 */
 
-    // return C;
-    #elif INSTLEVEL >= 6 /* AVX */
+    // #elif INSTLEVEL >= 6 /* AVX */
     int quotient = Bc / B32_YMM;
     int remainder = Bc % B32_YMM;
     __m256i mask;
@@ -119,48 +126,39 @@ float** fp32_mat_mul(int Ar, int Ac, int Br, int Bc,
         for(; c<(Bc - remainder); c+=B32_YMM) {
             C_sum = _mm256_setzero_ps();
             for(int k=0; k<Ac; k++) {
-                __m256 A_val = _mm256_set1_ps(A[r][k]); /* one element of first matrix */
-                __m256 B_vec = _mm256_loadu_ps(&B[k][c]); /* one row of second matrix */
+                __m256 A_val = _mm256_set1_ps(A[r*Ac + k]); /* one element of first matrix */
+                __m256 B_vec = _mm256_loadu_ps(&B[k*Bc + c]); /* one row of second matrix */
                 __m256 C_vec = _mm256_mul_ps(A_val, B_vec); /* scalar * vector multiplication */
                 C_sum = _mm256_add_ps(C_sum, C_vec); /* stacking partial sum */
             }
-            _mm256_storeu_ps(&C[r][c], C_sum);
+            _mm256_storeu_ps(&C[r*Br + c], C_sum);
         }
         // TODO: Optimization for remainder elements
         C_sum = _mm256_setzero_ps();
         for(int k=0; k<Ac; k++) {
-            __m256 A_val = _mm256_set1_ps(A[r][k]); /* one element of first matrix */
-            __m256 B_vec = _mm256_maskload_ps(&B[k][c], mask); /* one row of second matrix */
+            __m256 A_val = _mm256_set1_ps(A[r*Ac + k]); /* one element of first matrix */
+            __m256 B_vec = _mm256_maskload_ps(&B[k*Bc + c], mask); /* one row of second matrix */
             __m256 C_vec = _mm256_mul_ps(A_val, B_vec); /* scalar * vector multiplication */
             C_sum = _mm256_add_ps(C_sum, C_vec); /* stacking partial sum */
         }
-        _mm256_maskstore_ps(&C[r][c], mask, C_sum);
+        _mm256_maskstore_ps(&C[r*Br + c], mask, C_sum);
     }
-    return C;
     #else /* No SIMD Extension -> Scalar */
-    for(int r=0; r<Ar; r++) 
-        for(int c=0; c<Bc; c++)
-            for(int k=0; k<Ac; k++) 
-                C[r][c] += (A[r][k] * B[k][c]);
-    return C;
+    // for(int r=0; r<Ar; r++) 
+    //     for(int c=0; c<Bc; c++)
+    //         for(int k=0; k<Ac; k++) 
+    //             C[r][c] += (A[r][k] * B[k][c]);
     #endif
 }
 
-double** fp64_mat_mul(int Ar, int Ac, int Br, int Bc,
-            double A[Ar][Ac], double B[Br][Bc]) {
-    GEMM_VALID_DIM_CHECK(Ar, Ac, Br, Bc);
-    GEMM_ZERO_DIM_CHECK(Ar, Ac, Br, Bc);
+void fp64_gemm(const int Ar, const int Ac, const int Br, const int Bc,
+            const double* A, const double* B, double* C) {
+    GEMM_INPUT_VALID_CHECK(Ar, Ac, Br, Bc);
+    GEMM_INPUT_ZERO_CHECK(Ar, Ac, Br, Bc);
     
-    /* allocation of new matrix */
-    // TODO: Need to optimize memory allocation logic
-    double** C = (double **)malloc(sizeof(double)* (Ar));
-    for(int r=0; r<Ar; r++) 
-        C[r] = (double *)malloc(sizeof(double)* (Bc));
+    #if INSTLEVEL >= 7 /* AVX2 */
 
-    #if INSTLEVEL >= 7
-
-    return C;
-    #elif INSTLEVEL >= 6 /* AVX */
+    // #elif INSTLEVEL >= 6 /* AVX */
     int quotient = Bc / B64_YMM;
     int remainder = Bc % B64_YMM;
     __m256i mask;
@@ -175,22 +173,22 @@ double** fp64_mat_mul(int Ar, int Ac, int Br, int Bc,
         for(; c<(Bc - remainder); c+=B64_YMM) {
             C_sum = _mm256_setzero_pd();
             for(int k=0; k<Ac; k++) {
-                __m256d A_val = _mm256_set1_pd(A[r][k]); /* one element of first matrix */
-                __m256d B_vec = _mm256_loadu_pd(&B[k][c]); /* one row of second matrix */
+                __m256d A_val = _mm256_set1_pd(A[r*Ac + k]); /* one element of first matrix */
+                __m256d B_vec = _mm256_loadu_pd(&B[k*Bc + c]); /* one row of second matrix */
                 __m256d C_vec = _mm256_mul_pd(A_val, B_vec); /* scalar * vector multiplication */
                 C_sum = _mm256_add_pd(C_sum, C_vec); /* stacking partial sum */
             }
-            _mm256_storeu_pd(&C[r][c], C_sum);
+            _mm256_storeu_pd(&C[r*Br + c], C_sum);
         }
         // TODO: Optimization for remainder elements
         C_sum = _mm256_setzero_pd();
         for(int k=0; k<Ac; k++) {
-            __m256d A_val = _mm256_set1_pd(A[r][k]); /* one element of first matrix */
-            __m256d B_vec = _mm256_maskload_pd(&B[k][c], mask); /* one row of second matrix */
+            __m256d A_val = _mm256_set1_pd(A[r*Ac + k]); /* one element of first matrix */
+            __m256d B_vec = _mm256_maskload_pd(&B[k*Bc + c], mask); /* one row of second matrix */
             __m256d C_vec = _mm256_mul_pd(A_val, B_vec); /* scalar * vector multiplication */
             C_sum = _mm256_add_pd(C_sum, C_vec); /* stacking partial sum */
         }
-        _mm256_maskstore_pd(&C[r][c], mask, C_sum);
+        _mm256_maskstore_pd(&C[r*Br + c], mask, C_sum);
     }
 
     /** Loop unrolled code
@@ -216,13 +214,11 @@ double** fp64_mat_mul(int Ar, int Ac, int Br, int Bc,
     //         _mm256_storeu_pd(&C[r][c+B64_YMM], sum2);
     //     }
     // }
-    return C;
     #else /* No SIMD Extension -> Scalar */
-    for(int r=0; r<Ar; r++) 
-        for(int c=0; c<Bc; c++)
-            for(int k=0; k<Ac; k++) 
-                C[r][c] += (A[r][k] * B[k][c]);
-    return C;
+    // for(int r=0; r<Ar; r++) 
+    //     for(int c=0; c<Bc; c++)
+    //         for(int k=0; k<Ac; k++) 
+    //             C[r][c] += (A[r][k] * B[k][c]);
     #endif
 }
 
