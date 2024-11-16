@@ -6,7 +6,7 @@
 #include "kernel.h"
 #include "pack.h"
 
-#if INSTLEVEL >= 6 /* AVX */
+#if INSTLEVEL >= 7  /* AVX, AVX2 */
 #define NTHREADS 8
 
 #define MR 6
@@ -16,7 +16,7 @@
 #define MC MR * NTHREADS * 4
 
 #define KC 500
-#endif
+#endif              /* AVX, AVX2 */
 
 #define MEM_ALIGN 32
 
@@ -50,7 +50,7 @@ void gemm(const float* A, const float* B, float* C,
                     for(int Bb_col = 0; Bb_col < nc; Bb_col += NR) {    /* 2nd loop */
                         const int nr = min(NR, nc - Bb_col);
                         const int mr = min(MR, mc - Ab_row);
-                        kernel_6x16(&packed_A[Ab_row * KC], &packed_B[Bb_col], 
+                        u_kernel(&packed_A[Ab_row * KC], &packed_B[Bb_col], 
                         &C[((Am_row + Ab_row) * N) + (Bm_col + Bb_col)], mr, kc, KC, nr, NC, N);
                     }
                 }

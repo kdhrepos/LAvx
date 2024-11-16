@@ -6,7 +6,7 @@
 #include "sse.h"
 #include "util.h"
 
-void kernel_6x16(const float* packed_blockA, const float* packed_blockB, float* C,
+void u_kernel(const float* packed_blockA, const float* packed_blockB, float* C,
                 const int m, const int kc, const int KC, 
                 const int n, const int N, const int NC);
 // void kernel_14x8();
@@ -17,7 +17,7 @@ static int32_t mask[32] __attribute__((aligned(32))) = {
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0};
 #endif
 
-void kernel_6x16(const float* packed_blockA, const float* packed_blockB, float* C,
+void u_kernel(const float* packed_blockA, const float* packed_blockB, float* C,
                 const int m, const int kc, const int KC, 
                 const int n, const int NC, const int N) {
 #if INSTLEVEL >= 7 /* AVX2 */
