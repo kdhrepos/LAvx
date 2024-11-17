@@ -6,19 +6,19 @@
 #include "kernel.h"
 #include "pack.h"
 
-#if INSTLEVEL >= 7  /* AVX, AVX2 */
-#define NTHREADS 8
-
-#define MR 6
+#if INSTLEVEL >= 8 /* AVX512F */
+#define NR 32
+#define MR 14
+#elif INSTLEVEL >= 6  /* AVX, AVX2 */
 #define NR 16
+#define MR 6
+#endif
 
 #define NC NR * NTHREADS * 1
 #define MC MR * NTHREADS * 4
-
 #define KC 500
-#endif              /* AVX, AVX2 */
 
-#define MEM_ALIGN 32
+#define MEM_ALIGN 64
 
 void gemm(const float* A, const float* B, float* C,
         const int M, const int N, const int K) {
