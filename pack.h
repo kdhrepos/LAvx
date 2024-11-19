@@ -8,16 +8,16 @@
 
 #define NTHREADS 8
 
-/**
- * Load B(Kc x Nc) to L3 Cache
- * Pack panel B(Kc x Nc)
- * @param B - current point
- * @param packed_B
- * @param nc
- * @param nr
- * @param kc
- * @param K - full row of B
- */
+void pack_blockB(const float* B, float* packed_B, const int nc, 
+                const int NR, const int NC, const int N, const int kc);
+void pack_blockA(const float* A, float* packed_A, const int mc, 
+                const int MR, const int kc, const int KC, const int K);
+void pack_panelB(const float* B, float* packed_B, 
+                const int nr, const int NC, const int N, const int kc);
+void pack_panelA(const float* A, float* packed_A, 
+                const int mr, const int kc, const int KC, const int K);
+
+
 void pack_blockB(const float* B, float* packed_B, const int nc, 
                 const int NR, const int NC, const int N, const int kc) {
 #pragma omp parallel for num_threads(NTHREADS) schedule(static)
@@ -38,10 +38,6 @@ void pack_blockB(const float* B, float* packed_B, const int nc,
 #endif
 }
 
-/**
- * Pack panel B(Kc x Nr)
- * @param B, packed_B
- */
 void pack_panelB(const float* B, float* packed_B, 
                 const int nr, const int NC, const int N, const int kc) {
     for(int Bp_row = 0; Bp_row < kc; Bp_row++) {            /* row access */
@@ -54,13 +50,6 @@ void pack_panelB(const float* B, float* packed_B,
     }
 }
 
-/**
- * Pack panel A(Mc x Kc)
- * @param A
- * @param packed_A
- * @param MR
- * @param kc
- */
 void pack_blockA(const float* A, float* packed_A, const int mc, 
                 const int MR, const int kc, const int KC, const int K) {
 #pragma omp parallel for num_threads(NTHREADS) schedule(static)
@@ -93,4 +82,4 @@ void pack_panelA(const float* A, float* packed_A,
     }
 }
 
-#endif PACK_H
+#endif
