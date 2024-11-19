@@ -8,6 +8,12 @@
 
 #if INSTLEVEL >= 8 /* AVX512F */
 // No need mask array
+static int32_t mask[64] __attribute__((aligned(32))) = {
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
+};
 #elif INSTLEVEL >= 6 /* AVX, AVX2 */
 static int32_t mask[32] __attribute__((aligned(32))) = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -35,17 +41,43 @@ void u_kernel(const float* packed_blockA, const float* packed_blockB, float* C,
               const int n, const int NC, const int N) {
 #if INSTLEVEL >= 8 /* AVX512F */ /* 14x32 micro kernel */
     __m512 packed_C[14][2]; /* 14x32 */
+    __m256 packed_CC[3][4]; /* 3x32 */
+    __m256i packed_mask[4];
     __m512 b0_blockB, b1_blockB, a_blockA;
+    __m256 b0_blockBB, b1_blockBB, b2_blockBB, b3_blockBB, a_blockAA;
+
     __mmask16 packed_mask_0 = (n < 16)  ? 0xFFFF >> (16 - n) : 0xFFFF;
     __mmask16 packed_mask_1 = (n >= 16) ? 0xFFFF >> (32 - n) : 0xFFFF;
 
-    for (int r = 0; r < m; r++) {
-        packed_C[r][0] = _mm512_maskz_loadu_ps(packed_mask_0, &C[r * N + 0]);
-        packed_C[r][1] = _mm512_maskz_loadu_ps(packed_mask_1, &C[r * N + 16]);
+    packed_mask[0] = _mm256_loadu_si256(&mask[32 - n + 0]);
+    packed_mask[1] = _mm256_loadu_si256(&mask[32 - n + 8]);
+    packed_mask[2] = _mm256_loadu_si256(&mask[32 - n + 16]);
+    packed_mask[3] = _mm256_loadu_si256(&mask[32 - n + 24]);
+    
+    if(m >= 14) { 
+        for (int r = 0; r < 14; r++) {
+            packed_C[r][0] = _mm512_maskz_loadu_ps(packed_mask_0, &C[r * N + 0]);
+            packed_C[r][1] = _mm512_maskz_loadu_ps(packed_mask_1, &C[r * N + 16]);
+        }
+        for (int r = 14; r < m; r++) {
+            packed_CC[r - 14][0] = _mm256_maskload_ps(&C[r * N + 0],  packed_mask[0]);
+            packed_CC[r - 14][1] = _mm256_maskload_ps(&C[r * N + 8],  packed_mask[1]);
+            packed_CC[r - 14][2] = _mm256_maskload_ps(&C[r * N + 16], packed_mask[2]);
+            packed_CC[r - 14][3] = _mm256_maskload_ps(&C[r * N + 24], packed_mask[3]);
+        }
+    } else {
+        for (int r = 0; r < m; r++) {
+            packed_C[r][0] = _mm512_maskz_loadu_ps(packed_mask_0, &C[r * N + 0]);
+            packed_C[r][1] = _mm512_maskz_loadu_ps(packed_mask_1, &C[r * N + 16]);
+        }
     }
     for(int k = 0; k < kc; k++) {
         b0_blockB = _mm512_load_ps(packed_blockB + 0);
         b1_blockB = _mm512_load_ps(packed_blockB + 16);
+        b0_blockBB = _mm256_loadu_ps(packed_blockB + 0);
+        b1_blockBB = _mm256_loadu_ps(packed_blockB + 8);
+        b2_blockBB = _mm256_loadu_ps(packed_blockB + 16);
+        b3_blockBB = _mm256_loadu_ps(packed_blockB + 24);
 
         a_blockA = _mm512_set1_ps(packed_blockA[KC * 0]); /* scalar */
         packed_C[0][0] = _mm512_fmadd_ps(b0_blockB, a_blockA, packed_C[0][0]);
@@ -103,12 +135,43 @@ void u_kernel(const float* packed_blockA, const float* packed_blockB, float* C,
         packed_C[13][0] = _mm512_fmadd_ps(b0_blockB, a_blockA, packed_C[13][0]);
         packed_C[13][1] = _mm512_fmadd_ps(b1_blockB, a_blockA, packed_C[13][1]);
 
+        a_blockAA = _mm256_broadcast_ss(packed_blockA + (KC * 14)); /* scalar */
+        packed_CC[0][0] = _mm256_fmadd_ps(b0_blockBB, a_blockAA, packed_CC[0][0]);
+        packed_CC[0][1] = _mm256_fmadd_ps(b1_blockBB, a_blockAA, packed_CC[0][1]);
+        packed_CC[0][2] = _mm256_fmadd_ps(b2_blockBB, a_blockAA, packed_CC[0][2]);
+        packed_CC[0][3] = _mm256_fmadd_ps(b3_blockBB, a_blockAA, packed_CC[0][3]);
+
+        a_blockAA = _mm256_broadcast_ss(packed_blockA + (KC * 15)); /* scalar */
+        packed_CC[1][0] = _mm256_fmadd_ps(b0_blockBB, a_blockAA, packed_CC[1][0]);
+        packed_CC[1][1] = _mm256_fmadd_ps(b1_blockBB, a_blockAA, packed_CC[1][1]);
+        packed_CC[1][2] = _mm256_fmadd_ps(b2_blockBB, a_blockAA, packed_CC[1][2]);
+        packed_CC[1][3] = _mm256_fmadd_ps(b3_blockBB, a_blockAA, packed_CC[1][3]);
+
+        a_blockAA = _mm256_broadcast_ss(packed_blockA + (KC * 16)); /* scalar */
+        packed_CC[2][0] = _mm256_fmadd_ps(b0_blockBB, a_blockAA, packed_CC[2][0]);
+        packed_CC[2][1] = _mm256_fmadd_ps(b1_blockBB, a_blockAA, packed_CC[2][1]);
+        packed_CC[2][2] = _mm256_fmadd_ps(b2_blockBB, a_blockAA, packed_CC[2][2]);
+        packed_CC[2][3] = _mm256_fmadd_ps(b3_blockBB, a_blockAA, packed_CC[2][3]);
+
         packed_blockA += 1; /* next column */
         packed_blockB += NC; /* next 32 elements*/
     }
-    for(int r = 0; r < m; r++) {
-        _mm512_mask_storeu_ps(&C[r * N + 0], packed_mask_0, packed_C[r][0]);
-        _mm512_mask_storeu_ps(&C[r * N + 16], packed_mask_1, packed_C[r][1]);
+    if(m >= 14) {
+        for(int r = 0; r < 14; r++) {
+            _mm512_mask_storeu_ps(&C[r * N + 0],  packed_mask_0, packed_C[r][0]);
+            _mm512_mask_storeu_ps(&C[r * N + 16], packed_mask_1, packed_C[r][1]);
+        }
+        for(int r = 14; r < m; r++) {
+            _mm256_maskstore_ps(&C[r * N + 0],  packed_mask[0], packed_CC[r - 14][0]);
+            _mm256_maskstore_ps(&C[r * N + 8],  packed_mask[1], packed_CC[r - 14][1]);
+            _mm256_maskstore_ps(&C[r * N + 16], packed_mask[2], packed_CC[r - 14][2]);
+            _mm256_maskstore_ps(&C[r * N + 24], packed_mask[3], packed_CC[r - 14][3]);
+        }
+    } else {
+        for(int r = 0; r < m; r++) {
+            _mm512_mask_storeu_ps(&C[r * N + 0],  packed_mask_0, packed_C[r][0]);
+            _mm512_mask_storeu_ps(&C[r * N + 16], packed_mask_1, packed_C[r][1]);
+        }
     }
 #elif INSTLEVEL >= 7 /* AVX2 */ /* 6x16 micro kernel */
     __m256 packed_C[6][2]; /* 6x16 */
