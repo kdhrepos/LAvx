@@ -21,10 +21,11 @@ static int32_t mask[32] __attribute__((aligned(32))) = {
  * INSTLEVEL >= 8 for AVX512F
  *  14x32 kernel vs 31x16 kernel
  *  32 ZMM registers
+ *  Use FMA
  * INSTLEVEL >= 7 for AVX2
  *  6x16 kernel
  *  16 YMM registers
- *  FMA
+ *  Use FMA
  * INSTLEVEL >= 6 for AVX
  *  6x16 kernel
  *  16 YMM registers
@@ -207,7 +208,6 @@ void u_kernel(const float* packed_blockA, const float* packed_blockB, float* C,
         packed_C[r][1][4], packed_C[r][1][5], packed_C[r][1][6], packed_C[r][1][7]);
     }
 #endif
-
     for(int r = 0; r < m; r++) {
         _mm256_maskstore_ps(&C[r * N + 0], packed_mask[0], packed_C[r][0]);
         _mm256_maskstore_ps(&C[r * N + 8], packed_mask[1], packed_C[r][1]);

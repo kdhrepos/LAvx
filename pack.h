@@ -20,7 +20,7 @@
  */
 void pack_blockB(const float* B, float* packed_B, const int nc, 
                 const int NR, const int NC, const int N, const int kc) {
-// #pragma omp parallel for num_threads(NTHREADS) schedule(static)
+#pragma omp parallel for num_threads(NTHREADS) schedule(static)
     for(int Bb_row = 0; Bb_row < nc; Bb_row += NR) {
         int nr = min(NR, nc - Bb_row);
         pack_panelB(&B[Bb_row], &packed_B[Bb_row], nr, NC, N, kc);
@@ -63,7 +63,7 @@ void pack_panelB(const float* B, float* packed_B,
  */
 void pack_blockA(const float* A, float* packed_A, const int mc, 
                 const int MR, const int kc, const int KC, const int K) {
-// #pragma omp parallel for num_threads(NTHREADS) schedule(static)
+#pragma omp parallel for num_threads(NTHREADS) schedule(static)
     for(int Ab_row = 0; Ab_row < mc; Ab_row += MR) { /* split block to small panels */
         int mr = min(MR, mc - Ab_row);
         pack_panelA(&A[Ab_row * K], &packed_A[Ab_row * KC], mr, kc, KC, K);

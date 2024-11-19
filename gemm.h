@@ -14,8 +14,8 @@
 #define MR 6
 #endif
 
-#define NC NR * NTHREADS * 1
-#define MC MR * NTHREADS * 4
+#define NC NR * NTHREADS * 40
+#define MC MR * NTHREADS * 100
 #define KC 500
 
 #define MEM_ALIGN 64
@@ -45,7 +45,7 @@ void gemm(const float* A, const float* B, float* C,
                  * k is col iterator for Aj.
                  */
                 pack_blockA(&A[(Am_row * K) + k], packed_A, mc, MR, kc, KC, K);
-// #pragma omp parallel for num_threads(NTHREADS) schedule(static)
+#pragma omp parallel for num_threads(NTHREADS) schedule(static)
                 for(int Ab_row = 0; Ab_row < mc; Ab_row += MR) {        /* 1st loop */
                     for(int Bb_col = 0; Bb_col < nc; Bb_col += NR) {    /* 2nd loop */
                         const int nr = min(NR, nc - Bb_col);
