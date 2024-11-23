@@ -115,8 +115,7 @@ void u_kernel(const float* packed_blockA, const float* packed_blockB, float* C,
     __m256 packed_C[6][2]; /* 6x16 */
     __m256 b0_blockB, b1_blockB, a_blockA;
     __m256i packed_mask[2];
-    packed_mask[0] = _mm256_loadu_si256(&mask[16 - n + 0]);
-    packed_mask[1] = _mm256_loadu_si256(&mask[16 - n + 8]);
+    
     for (int r = 0; r < m; r++) {
         packed_C[r][0] = _mm256_maskload_ps(&C[r * N + 0], packed_mask[0]);
         packed_C[r][1] = _mm256_maskload_ps(&C[r * N + 8], packed_mask[1]);

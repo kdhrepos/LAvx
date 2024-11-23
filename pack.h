@@ -6,8 +6,6 @@
 #include "sse.h"
 #include "util.h"
 
-#define NTHREADS 8
-
 void pack_blockB(const float* B, float* packed_B, const int nc, 
                 const int NR, const int NC, const int N, const int kc);
 void pack_blockA(const float* A, float* packed_A, const int mc, 
@@ -20,6 +18,7 @@ void pack_panelA(const float* A, float* packed_A,
 
 void pack_blockB(const float* B, float* packed_B, const int nc, 
                 const int NR, const int NC, const int N, const int kc) {
+    int NTHREADS = omp_get_thread_num();
 #pragma omp parallel for num_threads(NTHREADS) schedule(static)
     for(int Bb_row = 0; Bb_row < nc; Bb_row += NR) {
         int nr = min(NR, nc - Bb_row);
@@ -52,6 +51,7 @@ void pack_panelB(const float* B, float* packed_B,
 
 void pack_blockA(const float* A, float* packed_A, const int mc, 
                 const int MR, const int kc, const int KC, const int K) {
+    int NTHREADS = omp_get_thread_num();
 #pragma omp parallel for num_threads(NTHREADS) schedule(static)
     for(int Ab_row = 0; Ab_row < mc; Ab_row += MR) { /* split block to small panels */
         int mr = min(MR, mc - Ab_row);
