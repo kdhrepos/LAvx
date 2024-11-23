@@ -1,5 +1,5 @@
-#ifndef SIMD_H
-#define SIMD_H
+#ifndef SSE_H
+#define SSE_H
 
 #pragma once
 
@@ -48,8 +48,8 @@
 #define INSTLEVEL 1
 #else 
 #define INSTLEVEL 0
-#endif
+#endif // INSTLEVEL
 
-#endif
+#endif // INSTLEVEL
 
-#endif
+#endif // SSE_H
