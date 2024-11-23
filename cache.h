@@ -13,7 +13,7 @@ void get_cache_size(size_t* cache_size);
 void set_block_size(size_t* cache_size, const int NTHREADS, 
                     const int MR, const int NR,
                     int* MC, int* KC, int* NC);
-void show_cache(size_t* cache_size)
+void show_cache(size_t* cache_size);
 
 void get_cache_size(size_t* cache_size) { 
     memset(cache_size, 0, sizeof(size_t) * 32);
