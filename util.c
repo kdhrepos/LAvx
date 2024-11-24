@@ -13,9 +13,9 @@ void fp32_get_rand_mat(int row, int col, float* mat, int bound) {
 }
 
 void fp64_get_rand_mat(int row, int col, double* mat, int bound) {
-    for (int r = 0; r < (row); r++)
-        for (int c = 0; c < (col); c++)
-            mat[r*col + c] = ((rand()) % (bound));
+    for (int r = 0; r < row; r++)
+        for (int c = 0; c < col; c++)
+            mat[r * col + c] = (rand() % bound);
 }
 
 void int32_scalar_gemm(const int Ar, const int Ac, const int Br, const int Bc,
@@ -88,11 +88,11 @@ void fp32_print(int row, int col, float* mat) {
     printf("\n");
 }
 
-void fp64_print(int row, int col, double mat[row][col]) {
+void fp64_print(int row, int col, double* mat) {
     printf("FP64 Print\n");
     for(int r=0; r<row; r++) {
         for (int c=0; c<col; c++) 
-            printf("%5.2lf ", mat[r][c]);
+            printf("%5.2lf ", mat[r * col + c]);
         printf("\n");
     }
     printf("\n");

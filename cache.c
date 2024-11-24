@@ -36,27 +36,32 @@ void get_cache_size(size_t* cache_size) {
 }
 
 void set_block_size(size_t* cache_size, const int NTHREADS,
-                    int* MC, int* KC, int* NC) {
+                    const int MR, const int NR,
+                    int* MC, int* KC, int* NC, D_TYPE d_type) {
     float MC_f = (*MC), NC_f = (*NC);
+    int d_size = 0;
+    if(d_type == D_FP32)        d_size = sizeof(float);
+    else if(d_type == D_FP64)   d_size = sizeof(double);
+    else if(d_type == D_INT32)  d_size = sizeof(int32_t);
 
     if(cache_size[1] != 0) {
-        (*KC) = cache_size[1] / (NR * sizeof(float));      // L1 = KC * NR
+        (*KC) = cache_size[1] / (NR * d_size);      // L1 = KC * NR
     }
     if(cache_size[2] != 0) {
-        MC_f = cache_size[2] / ((*KC) * sizeof(float));   // L2 = MC * KC
+        MC_f = cache_size[2] / ((*KC) * d_size);   // L2 = MC * KC
         MC_f /= (MR * NTHREADS);
         (*MC) = round(MC_f) * MR * NTHREADS;
     }
     if(cache_size[3] != 0) {
-        NC_f = cache_size[3] / ((*MC) * sizeof(float));   // L3 = NC * KC
+        NC_f = cache_size[3] / ((*MC) * d_size);   // L3 = NC * KC
         NC_f /= (NR * NTHREADS);
         (*NC) = round(NC_f) * NR * NTHREADS;
     }
 
-#ifdef DEBUG
-    printf("MC : %ld\n", (* MC));
-    printf("KC : %ld\n", (* KC));
-    printf("NC : %ld\n", (* NC));
+#if DEBUG
+    printf("MC : %d\n", (* MC));
+    printf("KC : %d\n", (* KC));
+    printf("NC : %d\n", (* NC));
 #endif
 }
 
@@ -66,11 +71,12 @@ void show_cache(size_t* cache_size) {
     printf("L3 size: %ld bytes\n", cache_size[3]);
 }
 
-void cache_opt(const int NTHREADS, int* MC, int* KC, int* NC) {
+void cache_opt(const int NTHREADS, const int MR, const int NR,
+               int* MC, int* KC, int* NC, D_TYPE d_type) {
     size_t cache_size[32];
     get_cache_size(cache_size);
-    set_block_size(cache_size, NTHREADS, &(*MC), &(*KC), &(*NC));
-#ifdef DEBUG
+    set_block_size(cache_size, NTHREADS, MR, NR, &(*MC), &(*KC), &(*NC), d_type);
+#if DEBUG
     show_cache(cache_size);
 #endif
 }

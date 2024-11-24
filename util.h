@@ -20,7 +20,9 @@ typedef short BOOL;
 
 #define min(a,b) ((a) < (b) ? (a) : (b))
 
-// #define DEBUG FALSE
+typedef enum {D_FP32, D_FP64, D_INT32} D_TYPE;
+
+#define DEBUG FALSE
 
 void int32_get_rand_mat(int row, int col, int32_t* mat, int bound);
 void fp32_get_rand_mat(int row, int col, float* mat, int bound);
@@ -42,5 +44,5 @@ BOOL fp64_gemm_result_check(int row, int col, double* T, double* C);
 
 void int32_print(int row, int col, int32_t mat[row][col]);
 void fp32_print(int row, int col, float* mat);
-void fp64_print(int row, int col, double mat[row][col]);
+void fp64_print(int row, int col, double* mat);
 #endif // UTIL_H

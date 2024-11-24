@@ -10,8 +10,11 @@ LIB = -lm
 matmul:
 	gcc -O2 -mno-avx512f -march=native -fopenmp $(TEST_DIR)matmul_parallel.c -o matmul	
 
-gemm_t:
-	$(CC) -o gemm_t $(TEST_DIR)gemm_t.c $(SRCS) $(FLAGS) $(LIB)
+sgemm:
+	$(CC) -o sgemm_t $(TEST_DIR)sgemm_t.c $(SRCS) $(FLAGS) $(LIB)
+
+dgemm:
+	$(CC) -o dgemm_t $(TEST_DIR)dgemm_t.c $(SRCS) $(FLAGS) $(LIB)
 
 clean :
 	rm $(TEST_EXE)
