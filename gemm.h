@@ -58,9 +58,10 @@ void dpack_panelA(const double* A, double* packed_A, const int mr,
  *          Cache Optimization
  *                                                      
 *********************************************************/
+
 /**
  * Get cache information especially cache size.
- * This only cares about data cache and L1 to L3.
+ * This only cares about data cache and also L1 to L3.
  */
 void show_cache(size_t* cache_size);
 void get_cache_size(size_t* cache_size);
