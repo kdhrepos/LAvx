@@ -118,28 +118,28 @@ void s_kernel(const float* packed_blockA, const float* packed_blockB, float* C,
         b1_blockB = _mm256_loadu_ps(packed_blockB + 8);
 
         a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 0)); 
-        packed_C[0][0] = _mm256_fmadd_ps(b0_blockB, a_blockA, packed_C[0][0]);
-        packed_C[0][1] = _mm256_fmadd_ps(b1_blockB, a_blockA, packed_C[0][1]);
+        packed_C[0][0] = S_FMA(a_blockA, b0_blockB, packed_C[0][0]); /* FMA */
+        packed_C[0][1] = S_FMA(a_blockA, b1_blockB, packed_C[0][1]); /* FMA */
 
         a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 1)); 
-        packed_C[1][0] = _mm256_fmadd_ps(b0_blockB, a_blockA, packed_C[1][0]);
-        packed_C[1][1] = _mm256_fmadd_ps(b1_blockB, a_blockA, packed_C[1][1]);
+        packed_C[1][0] = S_FMA(a_blockA, b0_blockB, packed_C[1][0]); /* FMA */
+        packed_C[1][1] = S_FMA(a_blockA, b1_blockB, packed_C[1][1]); /* FMA */
 
         a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 2)); 
-        packed_C[2][0] = _mm256_fmadd_ps(b0_blockB, a_blockA, packed_C[2][0]);
-        packed_C[2][1] = _mm256_fmadd_ps(b1_blockB, a_blockA, packed_C[2][1]);
+        packed_C[2][0] = S_FMA(a_blockA, b0_blockB, packed_C[2][0]); /* FMA */
+        packed_C[2][1] = S_FMA(a_blockA, b1_blockB, packed_C[2][1]); /* FMA */
 
         a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 3)); 
-        packed_C[3][0] = _mm256_fmadd_ps(b0_blockB, a_blockA, packed_C[3][0]);
-        packed_C[3][1] = _mm256_fmadd_ps(b1_blockB, a_blockA, packed_C[3][1]);
+        packed_C[3][0] = S_FMA(a_blockA, b0_blockB, packed_C[3][0]); /* FMA */
+        packed_C[3][1] = S_FMA(a_blockA, b1_blockB, packed_C[3][1]); /* FMA */
 
         a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 4)); 
-        packed_C[4][0] = _mm256_fmadd_ps(b0_blockB, a_blockA, packed_C[4][0]);
-        packed_C[4][1] = _mm256_fmadd_ps(b1_blockB, a_blockA, packed_C[4][1]);
+        packed_C[4][0] = S_FMA(a_blockA, b0_blockB, packed_C[4][0]); /* FMA */
+        packed_C[4][1] = S_FMA(a_blockA, b1_blockB, packed_C[4][1]); /* FMA */
 
         a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 5)); 
-        packed_C[5][0] = _mm256_fmadd_ps(b0_blockB, a_blockA, packed_C[5][0]);
-        packed_C[5][1] = _mm256_fmadd_ps(b1_blockB, a_blockA, packed_C[5][1]);
+        packed_C[5][0] = S_FMA(a_blockA, b0_blockB, packed_C[5][0]); /* FMA */
+        packed_C[5][1] = S_FMA(a_blockA, b1_blockB, packed_C[5][1]); /* FMA */
 
         packed_blockA += 1; /* next column */
         packed_blockB += NC; /* next 16 elements*/
@@ -170,28 +170,28 @@ void s_kernel(const float* packed_blockA, const float* packed_blockB, float* C,
         b1_blockB = _mm256_loadu_ps(packed_blockB + 8);
         
         a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 0)); 
-        packed_C[0][0] = _mm256_add_ps(packed_C[0][0], _mm256_mul_ps(b0_blockB, a_blockA)); /* FMA */
-        packed_C[0][1] = _mm256_add_ps(packed_C[0][1], _mm256_mul_ps(b1_blockB, a_blockA)); /* FMA */
+        packed_C[0][0] = S_FMA(a_blockA, b0_blockB, packed_C[0][0]); /* FMA */
+        packed_C[0][1] = S_FMA(a_blockA, b1_blockB, packed_C[0][1]); /* FMA */
 
         a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 1)); 
-        packed_C[1][0] = _mm256_add_ps(packed_C[1][0], _mm256_mul_ps(b0_blockB, a_blockA)); /* FMA */
-        packed_C[1][1] = _mm256_add_ps(packed_C[1][1], _mm256_mul_ps(b1_blockB, a_blockA)); /* FMA */
+        packed_C[1][0] = S_FMA(a_blockA, b0_blockB, packed_C[1][0]); /* FMA */
+        packed_C[1][1] = S_FMA(a_blockA, b1_blockB, packed_C[1][1]); /* FMA */
 
         a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 2)); 
-        packed_C[2][0] = _mm256_add_ps(packed_C[2][0], _mm256_mul_ps(b0_blockB, a_blockA)); /* FMA */
-        packed_C[2][1] = _mm256_add_ps(packed_C[2][1], _mm256_mul_ps(b1_blockB, a_blockA)); /* FMA */
+        packed_C[2][0] = S_FMA(a_blockA, b0_blockB, packed_C[2][0]); /* FMA */
+        packed_C[2][1] = S_FMA(a_blockA, b1_blockB, packed_C[2][1]); /* FMA */
 
         a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 3)); 
-        packed_C[3][0] = _mm256_add_ps(packed_C[3][0], _mm256_mul_ps(b0_blockB, a_blockA)); /* FMA */
-        packed_C[3][1] = _mm256_add_ps(packed_C[3][1], _mm256_mul_ps(b1_blockB, a_blockA)); /* FMA */
+        packed_C[3][0] = S_FMA(a_blockA, b0_blockB, packed_C[3][0]); /* FMA */
+        packed_C[3][1] = S_FMA(a_blockA, b1_blockB, packed_C[3][1]); /* FMA */
 
         a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 4)); 
-        packed_C[4][0] = _mm256_add_ps(packed_C[4][0], _mm256_mul_ps(b0_blockB, a_blockA)); /* FMA */
-        packed_C[4][1] = _mm256_add_ps(packed_C[4][1], _mm256_mul_ps(b1_blockB, a_blockA)); /* FMA */
+        packed_C[4][0] = S_FMA(a_blockA, b0_blockB, packed_C[4][0]); /* FMA */
+        packed_C[4][1] = S_FMA(a_blockA, b1_blockB, packed_C[4][1]); /* FMA */
 
         a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 5)); 
-        packed_C[5][0] = _mm256_add_ps(packed_C[5][0], _mm256_mul_ps(b0_blockB, a_blockA)); /* FMA */
-        packed_C[5][1] = _mm256_add_ps(packed_C[5][1], _mm256_mul_ps(b1_blockB, a_blockA)); /* FMA */
+        packed_C[5][0] = S_FMA(a_blockA, b0_blockB, packed_C[5][0]); /* FMA */
+        packed_C[5][1] = S_FMA(a_blockA, b1_blockB, packed_C[5][1]); /* FMA */
 
         packed_blockA += 1; /* next column */
         packed_blockB += NC; /* next 16 elements*/
@@ -273,28 +273,28 @@ void d_kernel(const double* packed_blockA, const double* packed_blockB, double* 
         b1_blockB = _mm256_load_pd(packed_blockB + 4);
 
         a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 0));
-        packed_C[0][0] = _mm256_fmadd_pd(b0_blockB, a_blockA, packed_C[0][0]);
-        packed_C[0][1] = _mm256_fmadd_pd(b1_blockB, a_blockA, packed_C[0][1]);
+        packed_C[0][0] = D_FMA(a_blockA, b0_blockB, packed_C[0][0]);
+        packed_C[0][1] = D_FMA(a_blockA, b1_blockB, packed_C[0][1]);
 
         a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 1));
-        packed_C[1][0] = _mm256_fmadd_pd(b0_blockB, a_blockA, packed_C[1][0]);
-        packed_C[1][1] = _mm256_fmadd_pd(b1_blockB, a_blockA, packed_C[1][1]);
+        packed_C[1][0] = D_FMA(a_blockA, b0_blockB, packed_C[1][0]);
+        packed_C[1][1] = D_FMA(a_blockA, b1_blockB, packed_C[1][1]);
 
         a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 2));
-        packed_C[2][0] = _mm256_fmadd_pd(b0_blockB, a_blockA, packed_C[2][0]);
-        packed_C[2][1] = _mm256_fmadd_pd(b1_blockB, a_blockA, packed_C[2][1]);
+        packed_C[2][0] = D_FMA(a_blockA, b0_blockB, packed_C[2][0]);
+        packed_C[2][1] = D_FMA(a_blockA, b1_blockB, packed_C[2][1]);
 
         a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 3));
-        packed_C[3][0] = _mm256_fmadd_pd(b0_blockB, a_blockA, packed_C[3][0]);
-        packed_C[3][1] = _mm256_fmadd_pd(b1_blockB, a_blockA, packed_C[3][1]);
+        packed_C[3][0] = D_FMA(a_blockA, b0_blockB, packed_C[3][0]);
+        packed_C[3][1] = D_FMA(a_blockA, b1_blockB, packed_C[3][1]);
 
         a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 4));
-        packed_C[4][0] = _mm256_fmadd_pd(b0_blockB, a_blockA, packed_C[4][0]);
-        packed_C[4][1] = _mm256_fmadd_pd(b1_blockB, a_blockA, packed_C[4][1]);
+        packed_C[4][0] = D_FMA(a_blockA, b0_blockB, packed_C[4][0]);
+        packed_C[4][1] = D_FMA(a_blockA, b1_blockB, packed_C[4][1]);
 
         a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 5));
-        packed_C[5][0] = _mm256_fmadd_pd(b0_blockB, a_blockA, packed_C[5][0]);
-        packed_C[5][1] = _mm256_fmadd_pd(b1_blockB, a_blockA, packed_C[5][1]);
+        packed_C[5][0] = D_FMA(a_blockA, b0_blockB, packed_C[5][0]);
+        packed_C[5][1] = D_FMA(a_blockA, b1_blockB, packed_C[5][1]);
 
         packed_blockA += 1;  /* next column */
         packed_blockB += NC; /* next 8 elements*/
@@ -323,29 +323,29 @@ void d_kernel(const double* packed_blockA, const double* packed_blockB, double* 
         b0_blockB = _mm256_loadu_pd(packed_blockB + 0);
         b1_blockB = _mm256_loadu_pd(packed_blockB + 4);
         
-        a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 0)); 
-        packed_C[0][0] = _mm256_add_pd(packed_C[0][0], _mm256_mul_pd(b0_blockB, a_blockA)); /* FMA */
-        packed_C[0][1] = _mm256_add_pd(packed_C[0][1], _mm256_mul_pd(b1_blockB, a_blockA)); /* FMA */
+        a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 0));
+        packed_C[0][0] = D_FMA(a_blockA, b0_blockB, packed_C[0][0]);
+        packed_C[0][1] = D_FMA(a_blockA, b1_blockB, packed_C[0][1]);
 
-        a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 1)); 
-        packed_C[1][0] = _mm256_add_pd(packed_C[1][0], _mm256_mul_pd(b0_blockB, a_blockA)); /* FMA */
-        packed_C[1][1] = _mm256_add_pd(packed_C[1][1], _mm256_mul_pd(b1_blockB, a_blockA)); /* FMA */
+        a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 1));
+        packed_C[1][0] = D_FMA(a_blockA, b0_blockB, packed_C[1][0]);
+        packed_C[1][1] = D_FMA(a_blockA, b1_blockB, packed_C[1][1]);
 
-        a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 2)); 
-        packed_C[2][0] = _mm256_add_pd(packed_C[2][0], _mm256_mul_pd(b0_blockB, a_blockA)); /* FMA */
-        packed_C[2][1] = _mm256_add_pd(packed_C[2][1], _mm256_mul_pd(b1_blockB, a_blockA)); /* FMA */
+        a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 2));
+        packed_C[2][0] = D_FMA(a_blockA, b0_blockB, packed_C[2][0]);
+        packed_C[2][1] = D_FMA(a_blockA, b1_blockB, packed_C[2][1]);
 
-        a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 3)); 
-        packed_C[3][0] = _mm256_add_pd(packed_C[3][0], _mm256_mul_pd(b0_blockB, a_blockA)); /* FMA */
-        packed_C[3][1] = _mm256_add_pd(packed_C[3][1], _mm256_mul_pd(b1_blockB, a_blockA)); /* FMA */
+        a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 3));
+        packed_C[3][0] = D_FMA(a_blockA, b0_blockB, packed_C[3][0]);
+        packed_C[3][1] = D_FMA(a_blockA, b1_blockB, packed_C[3][1]);
 
-        a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 4)); 
-        packed_C[4][0] = _mm256_add_pd(packed_C[4][0], _mm256_mul_pd(b0_blockB, a_blockA)); /* FMA */
-        packed_C[4][1] = _mm256_add_pd(packed_C[4][1], _mm256_mul_pd(b1_blockB, a_blockA)); /* FMA */
+        a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 4));
+        packed_C[4][0] = D_FMA(a_blockA, b0_blockB, packed_C[4][0]);
+        packed_C[4][1] = D_FMA(a_blockA, b1_blockB, packed_C[4][1]);
 
-        a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 5)); 
-        packed_C[5][0] = _mm256_add_pd(packed_C[5][0], _mm256_mul_pd(b0_blockB, a_blockA)); /* FMA */
-        packed_C[5][1] = _mm256_add_pd(packed_C[5][1], _mm256_mul_pd(b1_blockB, a_blockA)); /* FMA */
+        a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 5));
+        packed_C[5][0] = D_FMA(a_blockA, b0_blockB, packed_C[5][0]);
+        packed_C[5][1] = D_FMA(a_blockA, b1_blockB, packed_C[5][1]);
 
         packed_blockA += 1; /* next column */
         packed_blockB += NC; /* next 16 elements*/
@@ -354,9 +354,5 @@ void d_kernel(const double* packed_blockA, const double* packed_blockB, double* 
         _mm256_maskstore_pd(&C[r * N + 0], packed_mask[0], packed_C[r][0]);
         _mm256_maskstore_pd(&C[r * N + 4], packed_mask[1], packed_C[r][1]);
     }
-#endif
+#endif // d_kernel
 }
-
-// void kernel_14x8() {
-    
-// }
