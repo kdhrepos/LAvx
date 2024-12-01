@@ -18,6 +18,8 @@ void sgemm(const float* A, const float* B, float* C,
            const int M, const int N, const int K);
 void dgemm(const double* A, const double* B, double* C,
            const int M, const int N, const int K);
+void igemm(const int* A, const int* B, int* C,
+           const int M, const int N, const int K);
 
 /********************************************************
  *                                                      
@@ -31,6 +33,9 @@ void s_kernel(const float* packed_blockA, const float* packed_blockB, float* C,
 void d_kernel(const double* packed_blockA, const double* packed_blockB, double* C,
               const int m, const int kc, const int KC, 
               const int n, const int NC, const int N);
+void i_kernel(const int* packed_blockA, const int* packed_blockB, int* C,
+              const int m, const int kc, const int KC, 
+              const int n, const int NC, const int N);
 
 /********************************************************
  *                                                      
@@ -40,13 +45,13 @@ void d_kernel(const double* packed_blockA, const double* packed_blockB, double* 
 #if defined (__FMA__)
 #define S_FMA(a, b, c) _mm256_fmadd_ps((a), (b), (c))
 #else 
-#define S_FMA(a, b, c)  _mm256_add_ps((c), _mm256_mul_ps((a), (b)))
+#define S_FMA(a, b, c)  _mm256_add_ps((c), (_mm256_mul_ps((a), (b))))
 #endif // S_FMA
 
 #if defined (__FMA__)
 #define D_FMA(a, b, c) _mm256_fmadd_pd((a), (b), (c))
 #else 
-#define D_FMA(a, b, c)  _mm256_add_pd((c), _mm256_mul_pd((a), (b)))
+#define D_FMA(a, b, c)  _mm256_add_pd((c), (_mm256_mul_pd((a), (b))))
 #endif // D_FMA
 
 
@@ -72,6 +77,15 @@ void dpack_blockA(const double* A, double* packed_A, const int MR,
 void dpack_panelB(const double* B, double* packed_B, const int nr, 
                   const int NC, const int N, const int kc);
 void dpack_panelA(const double* A, double* packed_A, const int mr, 
+                  const int kc, const int KC, const int K);
+
+void ipack_blockB(const int* B, int* packed_B, const int NR, 
+                  const int nc, const int NC, const int N, const int kc);
+void ipack_blockA(const int* A, int* packed_A, const int MR,
+                  const int mc, const int kc, const int KC, const int K);
+void ipack_panelB(const int* B, int* packed_B, const int nr, 
+                  const int NC, const int N, const int kc);
+void ipack_panelA(const int* A, int* packed_A, const int mr, 
                   const int kc, const int KC, const int K);
 
 /********************************************************
