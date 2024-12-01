@@ -3,10 +3,10 @@
 
 #pragma once
 
-#if defined(_MSC_VER)
+ #if defined(_MSC_VER)
      /* Microsoft C/C++-compatible compiler */
      #include <intrin.h>
-#elif defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__))
+ #elif defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__))
      /* GCC-compatible compiler, targeting x86/x86-64 */
      #include <x86intrin.h>
 // #elif defined(__GNUC__) && defined(__ARM_NEON__)
@@ -21,35 +21,32 @@
 // #elif defined(__GNUC__) && defined(__SPE__)
 //      /* GCC-compatible compiler, targeting PowerPC with SPE */
 //      #include <spe.h>
-#endif
+ #endif
 
 // #if defined (__AVX512VL__)
 // #if defined (__AVX512F__) || defined ( __AVX512__ )
 // #if defined ( __AVX512VNNI__ )
 
 // TODO: Define another macros (or not...?)
-#ifndef INSTLEVEL
-
-#if defined (__AVX512F__) || defined ( __AVX512__ )
-#define INSTLEVEL 8
-#elif defined (__AVX2__)
-#define INSTLEVEL 7
-#elif defined (__AVX__)
-#define INSTLEVEL 6
-#elif defined (__SSE4_2__)
-#define INSTLEVEL 5
-#elif defined (__SSE4_1__)
-#define INSTLEVEL 4
-#elif defined (__SSE3__)
-#define INSTLEVEL 3
-#elif defined (__SSE2__)
-#define INSTLEVEL 2
-#elif defined (__SSE__)
-#define INSTLEVEL 1
-#else 
-#define INSTLEVEL 0
-#endif // INSTLEVEL
-
-#endif // INSTLEVEL
-
+ #ifndef INSTLEVEL
+  #if defined (__AVX512F__) || defined ( __AVX512__ )
+     #define INSTLEVEL 6
+  #elif defined (__AVX2__)
+     #define INSTLEVEL 6
+  #elif defined (__AVX__)
+     #define INSTLEVEL 6
+  #elif defined (__SSE4_2__)
+     #define INSTLEVEL 5
+  #elif defined (__SSE4_1__)
+     #define INSTLEVEL 4
+  #elif defined (__SSE3__)
+     #define INSTLEVEL 3
+  #elif defined (__SSE2__)
+     #define INSTLEVEL 2
+  #elif defined (__SSE__)
+     #define INSTLEVEL 1
+  #else 
+     #define INSTLEVEL 0
+  #endif // INSTLEVEL <LEVEL>
+ #endif // INSTLEVEL
 #endif // SSE_H

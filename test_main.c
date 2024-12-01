@@ -1,8 +1,17 @@
 #include "gemm.h"
 #include "test.h"
 
-static D_TYPE parse_dtype(const char* dtype) {
-    if(!strcmp(dtype, "float") || !strcmp(dtype, "s"))
+static D_TYPE parse_dtype(char* dtype);
+static char* to_lowercase(char* str);
+static void is_valid_integer(const char* input, const char* arg_type);
+static void help();
+
+static D_TYPE parse_dtype(char* dtype) {
+    dtype = to_lowercase(dtype);
+
+    if(!strcmp(dtype, "all") || !strcmp(dtype, "a"))
+        return D_ALL;
+    else if(!strcmp(dtype, "float") || !strcmp(dtype, "s") || !strcmp(dtype, "f"))
         return D_FP32;
     else if(!strcmp(dtype, "double") || !strcmp(dtype, "d"))
         return D_FP64;
@@ -24,6 +33,13 @@ static D_TYPE parse_dtype(const char* dtype) {
         fprintf(stderr, "Unknown datatype. Use --help for usage.\n");
         exit(EXIT_FAILURE);
     }
+}
+
+static char* to_lowercase(char* str) {
+    for (int i = 0; str[i] != '\0'; i++) {
+        str[i] = tolower((unsigned char)str[i]);
+    }
+    return str;
 }
 
 static void is_valid_integer(const char* input, const char* arg_type) {
@@ -49,7 +65,7 @@ static void help() {
     fprintf(stderr, "  -t, --type=<dtype>     Data type \n");
     fprintf(stderr, "                         s:  float \n");
     fprintf(stderr, "                         d:  double \n");
-    fprintf(stderr, "                         i:  int32  " "[Unsupported]\n");
+    fprintf(stderr, "                         i:  int32 \n");
     fprintf(stderr, "                         h:  hfloat " "[Unsupported]\n");
     fprintf(stderr, "                         bf: bfloat " "[Unsupported]\n");
     fprintf(stderr, "                         q:  int8   " "[Unsupported]\n");
@@ -88,7 +104,7 @@ int main(int argc, char* argv[]) {
         {0, 0, 0, 0}                     
     };
 
-    while((opt = getopt_long(argc, argv, "t:i:m:k:n:b:r:f:p:h", long_options, NULL)) != -1) {
+    while((opt = getopt_long(argc, argv, "t:m:k:n:i:r:b:f:p:h", long_options, NULL)) != -1) {
         switch (opt) {
             case 't':
                 dtype = parse_dtype(optarg);
@@ -140,6 +156,12 @@ int main(int argc, char* argv[]) {
         }
     }
     switch(dtype) {
+        case D_ALL: {
+            sgemm_test(M, N, K, niter, range, bound, file, console_flag);
+            dgemm_test(M, N, K, niter, range, bound, file, console_flag);
+            igemm_test(M, N, K, niter, range, bound, file, console_flag);
+            break;
+        }
         case D_FP32: {
             sgemm_test(M, N, K, niter, range, bound, file, console_flag);
             break;
@@ -149,6 +171,7 @@ int main(int argc, char* argv[]) {
             break;
         }
         case D_INT32: {
+            igemm_test(M, N, K, niter, range, bound, file, console_flag);
             break;
         }
         default: {
