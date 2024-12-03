@@ -65,19 +65,15 @@ void set_block_size(size_t* cache_size, const int NTHREADS,
 #endif
 }
 
-void show_cache(size_t* cache_size) {
-    printf("L1 size: %ld bytes\n", cache_size[1]);
-    printf("L2 size: %ld bytes\n", cache_size[2]);
-    printf("L3 size: %ld bytes\n", cache_size[3]);
-}
-
 void cache_opt(const int NTHREADS, const int MR, const int NR,
                int* MC, int* KC, int* NC, D_TYPE d_type) {
     size_t cache_size[32];
     get_cache_size(cache_size);
     set_block_size(cache_size, NTHREADS, MR, NR, &(*MC), &(*KC), &(*NC), d_type);
 #if DEBUG
-    show_cache(cache_size);
+    printf("L1 size: %ld bytes\n", cache_size[1]);
+    printf("L2 size: %ld bytes\n", cache_size[2]);
+    printf("L3 size: %ld bytes\n", cache_size[3]);
 #endif
 }
 
@@ -89,5 +85,8 @@ int get_core_num() {
       : "+a" (eax) , "=b" (ebx) , "+c" (ecx) , "=d" (edx)
     );
 
+#if DEBUG
+    printf("NTHREADS: %d\n", ((ebx >> 16) & 0xFF));
+#endif
     return ((ebx >> 16) & 0xFF); // the number of logical processors
 }
