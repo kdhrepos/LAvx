@@ -14,6 +14,8 @@ void spack_panelB(const float* B, float* packed_B, const int nr,
                   const int NC, const int N, const int kc) {
     for(int Bp_row = 0; Bp_row < kc; Bp_row++) {
         for(int Bp_col = 0; Bp_col < nr; Bp_col++) {
+    for(int Bp_row = 0; Bp_row < kc; Bp_row++) {
+        for(int Bp_col = 0; Bp_col < nr; Bp_col++) {
             packed_B[Bp_row * NC + Bp_col] = B[Bp_row * N + Bp_col];
         }
         // for (int Bp_col = nr; Bp_col < 16; Bp_col++) {
