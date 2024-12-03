@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <immintrin.h>
  #if defined(_MSC_VER)
      /* Microsoft C/C++-compatible compiler */
      #include <intrin.h>
@@ -29,10 +30,12 @@
 
 // TODO: Define another macros (or not...?)
  #ifndef INSTLEVEL
-  #if defined (__AVX512F__) || defined ( __AVX512__ )
-     #define INSTLEVEL 6
+  #if defined (__AVX512BW__) /* && defined (__AVX512VL__) */
+     #define INSTLEVEL 9
+  #elif defined (__AVX512F__) || defined (__AVX512__)
+     #define INSTLEVEL 8
   #elif defined (__AVX2__)
-     #define INSTLEVEL 6
+     #define INSTLEVEL 7
   #elif defined (__AVX__)
      #define INSTLEVEL 6
   #elif defined (__SSE4_2__)

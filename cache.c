@@ -43,6 +43,8 @@ void set_block_size(size_t* cache_size, const int NTHREADS,
     if(d_type == D_FP32)        d_size = sizeof(float);
     else if(d_type == D_FP64)   d_size = sizeof(double);
     else if(d_type == D_INT32)  d_size = sizeof(int32_t);
+    else if(d_type == D_INT16)  d_size = sizeof(int16_t);
+    else if(d_type == D_INT8)   d_size = sizeof(int8_t);
 
     if(cache_size[1] != 0) {
         (*KC) = cache_size[1] / (NR * d_size);      // L1 = KC * NR
