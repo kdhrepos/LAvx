@@ -2,7 +2,7 @@
 
 void spack_blockB(const float* B, float* packed_B, const int NR, 
                  const int nc, const int NC, const int N, const int kc) {
-    int NTHREADS = 8; 
+    int NTHREADS = omp_get_thread_num(); 
 #pragma omp parallel for num_threads(NTHREADS) schedule(static)
     for(int Bb_row = 0; Bb_row < nc; Bb_row += NR) {
         int nr = min(NR, nc - Bb_row);
@@ -24,7 +24,7 @@ void spack_panelB(const float* B, float* packed_B, const int nr,
 
 void spack_blockA(const float* A, float* packed_A, const int MR,
                 const int mc, const int kc, const int KC, const int K) {
-    int NTHREADS = 8; 
+    int NTHREADS = omp_get_thread_num(); 
 #pragma omp parallel for num_threads(NTHREADS) schedule(static)
     for(int Ab_row = 0; Ab_row < mc; Ab_row += MR) { /* split block to small panels */
         int mr = min(MR, mc - Ab_row);
@@ -45,7 +45,7 @@ void spack_panelA(const float* A, float* packed_A, const int mr,
 }
 void dpack_blockB(const double* B, double* packed_B, const int NR, 
                 const int nc, const int NC, const int N, const int kc) {
-    int NTHREADS = 8; 
+    int NTHREADS = omp_get_thread_num(); 
 #pragma omp parallel for num_threads(NTHREADS) schedule(static)
     for(int Bb_row = 0; Bb_row < nc; Bb_row += NR) {
         int nr = min(NR, nc - Bb_row);
@@ -67,7 +67,7 @@ void dpack_panelB(const double* B, double* packed_B, const int nr,
 
 void dpack_blockA(const double* A, double* packed_A, const int MR,
                 const int mc, const int kc, const int KC, const int K) {
-    int NTHREADS = 8; 
+    int NTHREADS = omp_get_thread_num(); 
 #pragma omp parallel for num_threads(NTHREADS) schedule(static)
     for(int Ab_row = 0; Ab_row < mc; Ab_row += MR) { /* split block to small panels */
         int mr = min(MR, mc - Ab_row);
@@ -89,7 +89,7 @@ void dpack_panelA(const double* A, double* packed_A, const int mr,
 
 void ipack_blockB(const int* B, int* packed_B, const int NR, 
                   const int nc, const int NC, const int N, const int kc) {
-    int NTHREADS = 8; 
+    int NTHREADS = omp_get_thread_num(); 
 #pragma omp parallel for num_threads(NTHREADS) schedule(static)
     for(int Bb_row = 0; Bb_row < nc; Bb_row += NR) {
         int nr = min(NR, nc - Bb_row);
@@ -99,7 +99,7 @@ void ipack_blockB(const int* B, int* packed_B, const int NR,
 
 void ipack_blockA(const int* A, int* packed_A, const int MR,
                   const int mc, const int kc, const int KC, const int K) {
-    int NTHREADS = 8; 
+    int NTHREADS = omp_get_thread_num(); 
 #pragma omp parallel for num_threads(NTHREADS) schedule(static)
     for(int Ab_row = 0; Ab_row < mc; Ab_row += MR) { /* split block to small panels */
         int mr = min(MR, mc - Ab_row);
