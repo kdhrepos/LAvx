@@ -62,27 +62,33 @@ void i_kernel(const int* packed_blockA, const int* packed_blockB, int* C,
 *********************************************************/
 
 void spack_blockB(const float* B, float* packed_B, const int NR, 
-                  const int nc, const int NC, const int N, const int kc);
+                  const int nc, const int NC, const int N, 
+                  const int kc, const int NTHREADS);
 void spack_blockA(const float* A, float* packed_A, const int MR,
-                  const int mc, const int kc, const int KC, const int K);
+                  const int mc, const int kc, const int KC, 
+                  const int K, const int NTHREADS);
 void spack_panelB(const float* B, float* packed_B, 
                   const int nr, const int NC, const int N, const int kc);
 void spack_panelA(const float* A, float* packed_A, 
                   const int mr, const int kc, const int KC, const int K);
 
 void dpack_blockB(const double* B, double* packed_B, const int NR, 
-                  const int nc, const int NC, const int N, const int kc);
+                  const int nc, const int NC, const int N, 
+                  const int kc, const int NTHREADS);
 void dpack_blockA(const double* A, double* packed_A, const int MR,
-                  const int mc, const int kc, const int KC, const int K);
+                  const int mc, const int kc, const int KC, 
+                  const int K, const int NTHREADS);
 void dpack_panelB(const double* B, double* packed_B, const int nr, 
                   const int NC, const int N, const int kc);
 void dpack_panelA(const double* A, double* packed_A, const int mr, 
                   const int kc, const int KC, const int K);
 
 void ipack_blockB(const int* B, int* packed_B, const int NR, 
-                  const int nc, const int NC, const int N, const int kc);
+                  const int nc, const int NC, const int N, 
+                  const int kc, const int NTHREADS);
 void ipack_blockA(const int* A, int* packed_A, const int MR,
-                  const int mc, const int kc, const int KC, const int K);
+                  const int mc, const int kc, const int KC, 
+                  const int K, const int NTHREADS);
 void ipack_panelB(const int* B, int* packed_B, const int nr, 
                   const int NC, const int N, const int kc);
 void ipack_panelA(const int* A, int* packed_A, const int mr, 
@@ -90,7 +96,7 @@ void ipack_panelA(const int* A, int* packed_A, const int mr,
 
 /********************************************************
  *                                                      
- *          Cache Optimization
+ *          Hardware Optimization
  *                                                      
 *********************************************************/
 
@@ -104,6 +110,7 @@ void set_block_size(size_t* cache_size, const int NTHREADS,
                     const int MR, const int NR,
                     int* MC, int* KC, int* NC, D_TYPE d_type);
 void cache_opt(const int NTHREADS, const int MR, const int NR,
-               int* MC, int* KC, int* NC, D_TYPE d_type) ;
+               int* MC, int* KC, int* NC, D_TYPE d_type);
+int get_core_num();
 
 #endif // GEMM_H

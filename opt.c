@@ -3,11 +3,11 @@
 void get_cache_size(size_t* cache_size) { 
     memset(cache_size, 0, sizeof(size_t) * 32);
 
-    for (int c_id = 0; c_id < 32; c_id++) {
+    for (int cache = 0; cache < 32; cache++) {
         uint32_t eax, ebx, ecx, edx;
 
-        eax = 4;    // get cache info
-        ecx = c_id; // cache id
+        eax = 4;     // get cache info
+        ecx = cache; // cache id
 
         /* CPUID instruction */
         __asm__ (
@@ -79,4 +79,15 @@ void cache_opt(const int NTHREADS, const int MR, const int NR,
 #if DEBUG
     show_cache(cache_size);
 #endif
+}
+
+int get_core_num() {
+    uint32_t eax=0x1, ebx=0, ecx=0, edx=0;
+
+    __asm__ (
+      "cpuid" 
+      : "+a" (eax) , "=b" (ebx) , "+c" (ecx) , "=d" (edx)
+    );
+
+    return ((ebx >> 16) & 0xFF); // the number of logical processors
 }

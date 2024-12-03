@@ -10,7 +10,7 @@ void sgemm(const float* A, const float* B, float* C,
 #endif
 
     int MC, KC, NC;
-    int NTHREADS = 8;
+    int NTHREADS = get_core_num();
     cache_opt(NTHREADS, MR, NR, &MC, &KC, &NC, D_FP32);
 
     /* packing for TLB efficiency */
@@ -21,10 +21,10 @@ void sgemm(const float* A, const float* B, float* C,
         const int nc = min(NC, N - Bm_col);         
         for(int k = 0; k < K; k += KC) {            /* 4th loop */
             const int kc = min(KC, K - k);     
-            spack_blockB(&B[k * N + Bm_col], packed_B, NR, nc, NC, N, kc);
+            spack_blockB(&B[k * N + Bm_col], packed_B, NR, nc, NC, N, kc, NTHREADS);
             for(int Am_row = 0; Am_row < M; Am_row += MC) { /* 3rd loop */
                 const int mc = min(MC, M - Am_row);
-                spack_blockA(&A[(Am_row * K) + k], packed_A, MR, mc, kc, KC, K);
+                spack_blockA(&A[(Am_row * K) + k], packed_A, MR, mc, kc, KC, K, NTHREADS);
 #pragma omp parallel for num_threads(NTHREADS) schedule(static)
                 for(int Ab_row = 0; Ab_row < mc; Ab_row += MR) {    /* 1st loop */
                     for(int Bb_col = 0; Bb_col < nc; Bb_col += NR) {    /* 2nd loop */
@@ -52,7 +52,7 @@ void dgemm(const double* A, const double* B, double* C,
 #endif
 
     int MC, KC, NC;
-    int NTHREADS = 8;
+    int NTHREADS = get_core_num();
     cache_opt(NTHREADS, MR, NR, &MC, &KC, &NC, D_FP64);
 
     /* packing for TLB efficiency */
@@ -63,10 +63,10 @@ void dgemm(const double* A, const double* B, double* C,
         const int nc = min(NC, N - Bm_col);         
         for(int k = 0; k < K; k += KC) {            /* 4th loop */
             const int kc = min(KC, K - k);     
-            dpack_blockB(&B[k * N + Bm_col], packed_B, NR, nc, NC, N, kc);
+            dpack_blockB(&B[k * N + Bm_col], packed_B, NR, nc, NC, N, kc, NTHREADS);
             for(int Am_row = 0; Am_row < M; Am_row += MC) { /* 3rd loop */
                 const int mc = min(MC, M - Am_row);
-                dpack_blockA(&A[(Am_row * K) + k], packed_A, MR, mc, kc, KC, K);
+                dpack_blockA(&A[(Am_row * K) + k], packed_A, MR, mc, kc, KC, K, NTHREADS);
 #pragma omp parallel for num_threads(NTHREADS) schedule(static)
                 for(int Ab_row = 0; Ab_row < mc; Ab_row += MR) {    /* 1st loop */
                     for(int Bb_col = 0; Bb_col < nc; Bb_col += NR) {    /* 2nd loop */
@@ -94,7 +94,7 @@ void igemm(const int* A, const int* B, int* C,
 #endif
 
     int MC, KC, NC;
-    int NTHREADS = 8;
+    int NTHREADS = get_core_num();
     cache_opt(NTHREADS, MR, NR, &MC, &KC, &NC, D_INT32);
 
     /* packing for TLB efficiency */
@@ -105,10 +105,10 @@ void igemm(const int* A, const int* B, int* C,
         const int nc = min(NC, N - Bm_col);         
         for(int k = 0; k < K; k += KC) {                                    /* 4th loop */
             const int kc = min(KC, K - k);     
-            ipack_blockB(&B[k * N + Bm_col], packed_B, NR, nc, NC, N, kc);
+            ipack_blockB(&B[k * N + Bm_col], packed_B, NR, nc, NC, N, kc, NTHREADS);
             for(int Am_row = 0; Am_row < M; Am_row += MC) {                 /* 3rd loop */
                 const int mc = min(MC, M - Am_row);
-                ipack_blockA(&A[(Am_row * K) + k], packed_A, MR, mc, kc, KC, K);
+                ipack_blockA(&A[(Am_row * K) + k], packed_A, MR, mc, kc, KC, K, NTHREADS);
 #pragma omp parallel for num_threads(NTHREADS) schedule(static)
                 for(int Ab_row = 0; Ab_row < mc; Ab_row += MR) {            /* 2nd loop */
                     for(int Bb_col = 0; Bb_col < nc; Bb_col += NR) {        /* 1st loop */
