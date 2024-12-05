@@ -25,9 +25,11 @@ static D_TYPE parse_dtype(char* dtype) {
         fprintf(stderr, "Unsupported datatype. Use --help for usage.\n");
         exit(EXIT_FAILURE);
     }
-    else if(!strcmp(dtype, "int8") || !strcmp(dtype, "q")) {
-        fprintf(stderr, "Unsupported datatype. Use --help for usage.\n");
-        exit(EXIT_FAILURE);
+    else if(!strcmp(dtype, "int16") || !strcmp(dtype, "q")) {
+        return D_INT16;
+    }
+    else if(!strcmp(dtype, "int8") || !strcmp(dtype, "hq")) {
+        return D_INT8;
     }
     else {
         fprintf(stderr, "Unknown datatype. Use --help for usage.\n");
@@ -66,9 +68,10 @@ static void help() {
     fprintf(stderr, "                         s:  float \n");
     fprintf(stderr, "                         d:  double \n");
     fprintf(stderr, "                         i:  int32 \n");
+    fprintf(stderr, "                         q:  int16  " "[Unsupported]\n");
+    fprintf(stderr, "                         hq: int8   " "[Unsupported]\n");
     fprintf(stderr, "                         h:  hfloat " "[Unsupported]\n");
     fprintf(stderr, "                         bf: bfloat " "[Unsupported]\n");
-    fprintf(stderr, "                         q:  int8   " "[Unsupported]\n");
     fprintf(stderr, "  -i, --iter=<num>       Number of iteration for each M, K, N \n");
     fprintf(stderr, "  -m, --M=<size>         Matrix size M for C(MxN) = A(MxK) X B(KxN) " "Default: 1024\n");
     fprintf(stderr, "  -k, --K=<size>         Matrix size K for C(MxN) = A(MxK) X B(KxN) " "Default: 1024\n");
@@ -155,11 +158,13 @@ int main(int argc, char* argv[]) {
             //     exit(EXIT_SUCCESS);
         }
     }
+
     switch(dtype) {
         case D_ALL: {
             sgemm_test(M, N, K, niter, range, bound, file, console_flag);
             dgemm_test(M, N, K, niter, range, bound, file, console_flag);
             igemm_test(M, N, K, niter, range, bound, file, console_flag);
+            qgemm_test(M, N, K, niter, range, bound, file, console_flag);
             break;
         }
         case D_FP32: {
@@ -172,6 +177,14 @@ int main(int argc, char* argv[]) {
         }
         case D_INT32: {
             igemm_test(M, N, K, niter, range, bound, file, console_flag);
+            break;
+        }
+        case D_INT16: {
+            qgemm_test(M, N, K, niter, range, bound, file, console_flag);
+            break;
+        }
+        case D_INT8: {
+            hqgemm_test(M, N, K, niter, range, bound, file, console_flag);
             break;
         }
         default: {
