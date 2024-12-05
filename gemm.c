@@ -126,7 +126,7 @@ void igemm(const int* A, const int* B, int* C,
     free(packed_B);
 }
 
-void qgemm(const int16_t* A, const int16_t* B, int16_t* C,
+void hqgemm(const int16_t* A, const int16_t* B, int16_t* C,
            const int M, const int N, const int K) {
 
 #if INSTLEVEL >= 9 /* AVX512BW */
@@ -147,16 +147,16 @@ void qgemm(const int16_t* A, const int16_t* B, int16_t* C,
         const int nc = min(NC, N - Bm_col);         
         for(int k = 0; k < K; k += KC) {                                    /* 4th loop */
             const int kc = min(KC, K - k);     
-            qpack_blockB(&B[k * N + Bm_col], packed_B, NR, nc, NC, N, kc);
+            hqpack_blockB(&B[k * N + Bm_col], packed_B, NR, nc, NC, N, kc);
             for(int Am_row = 0; Am_row < M; Am_row += MC) {                 /* 3rd loop */
                 const int mc = min(MC, M - Am_row);
-                qpack_blockA(&A[(Am_row * K) + k], packed_A, MR, mc, kc, KC, K);
+                hqpack_blockA(&A[(Am_row * K) + k], packed_A, MR, mc, kc, KC, K);
 #pragma omp parallel for num_threads(NTHREADS) schedule(static)
                 for(int Ab_row = 0; Ab_row < mc; Ab_row += MR) {            /* 2nd loop */
                     for(int Bb_col = 0; Bb_col < nc; Bb_col += NR) {        /* 1st loop */
                         const int nr = min(NR, nc - Bb_col);
                         const int mr = min(MR, mc - Ab_row);
-                        q_kernel(&packed_A[Ab_row * KC], &packed_B[Bb_col], 
+                        hq_kernel(&packed_A[Ab_row * KC], &packed_B[Bb_col], 
                         &C[((Am_row + Ab_row) * N) + (Bm_col + Bb_col)], mr, kc, KC, nr, NC, N);
                     }
                 }
@@ -168,7 +168,7 @@ void qgemm(const int16_t* A, const int16_t* B, int16_t* C,
     free(packed_B);
 }
 
-void hqgemm(const int8_t* A, const int8_t* B, int8_t* C,
+void qgemm(const int8_t* A, const int8_t* B, int8_t* C,
            const int M, const int N, const int K) {
 
 #if INSTLEVEL >= 9 /* AVX512BW */
@@ -189,16 +189,16 @@ void hqgemm(const int8_t* A, const int8_t* B, int8_t* C,
         const int nc = min(NC, N - Bm_col);         
         for(int k = 0; k < K; k += KC) {                                    /* 4th loop */
             const int kc = min(KC, K - k);     
-            hqpack_blockB(&B[k * N + Bm_col], packed_B, NR, nc, NC, N, kc);
+            qpack_blockB(&B[k * N + Bm_col], packed_B, NR, nc, NC, N, kc);
             for(int Am_row = 0; Am_row < M; Am_row += MC) {                 /* 3rd loop */
                 const int mc = min(MC, M - Am_row);
-                hqpack_blockA(&A[(Am_row * K) + k], packed_A, MR, mc, kc, KC, K);
+                qpack_blockA(&A[(Am_row * K) + k], packed_A, MR, mc, kc, KC, K);
 #pragma omp parallel for num_threads(NTHREADS) schedule(static)
                 for(int Ab_row = 0; Ab_row < mc; Ab_row += MR) {            /* 2nd loop */
                     for(int Bb_col = 0; Bb_col < nc; Bb_col += NR) {        /* 1st loop */
                         const int nr = min(NR, nc - Bb_col);
                         const int mr = min(MR, mc - Ab_row);
-                        hq_kernel(&packed_A[Ab_row * KC], &packed_B[Bb_col], 
+                        q_kernel(&packed_A[Ab_row * KC], &packed_B[Bb_col], 
                         &C[((Am_row + Ab_row) * N) + (Bm_col + Bb_col)], mr, kc, KC, nr, NC, N);
                     }
                 }

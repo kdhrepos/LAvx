@@ -11,9 +11,9 @@ void dgemm_test(const int M, const int N, const int K, const int niter,
                 const int range, const int bound, FILE* file, BOOL console_flag);
 void igemm_test(const int M, const int N, const int K, const int niter,
                 const int range, const int bound, FILE* file, BOOL console_flag);
-void qgemm_test(const int M, const int N, const int K, const int niter,
-                const int range, const int bound, FILE* file, BOOL console_flag);
 void hqgemm_test(const int M, const int N, const int K, const int niter,
+                const int range, const int bound, FILE* file, BOOL console_flag);
+void qgemm_test(const int M, const int N, const int K, const int niter,
                 const int range, const int bound, FILE* file, BOOL console_flag);
 
 uint64_t timer();
@@ -24,9 +24,9 @@ BOOL naive_dgemm(const double* A, const double* B, const double* C,
                 const int M, const int N, const int K);
 BOOL naive_igemm(const int* A, const int* B, const int* C,
                 const int M, const int N, const int K);
-BOOL naive_qgemm(const int16_t* A, const int16_t* B, const int16_t* C,
+BOOL naive_hqgemm(const int16_t* A, const int16_t* B, const int16_t* C,
                 const int M, const int N, const int K);
-BOOL naive_hqgemm(const int8_t* A, const int8_t* B, const int8_t* C,
+BOOL naive_qgemm(const int8_t* A, const int8_t* B, const int8_t* C,
                 const int M, const int N, const int K);
 
 void fp32_get_rand_mat(int row, int col, float* mat, int bound);

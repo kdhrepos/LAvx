@@ -492,7 +492,7 @@ void i_kernel(const int* packed_blockA, const int* packed_blockB, int* C,
 #endif // i_kernel
 }
 
-void q_kernel(const int16_t* packed_blockA, const int16_t* packed_blockB, int16_t* C,
+void hq_kernel(const int16_t* packed_blockA, const int16_t* packed_blockB, int16_t* C,
               const int m, const int kc, const int KC, 
               const int n, const int NC, const int N) {
 #if INSTLEVEL >= 9      /* AVX512BW */
@@ -604,7 +604,7 @@ void q_kernel(const int16_t* packed_blockA, const int16_t* packed_blockB, int16_
 #endif // q_kernel
 }
 
-void hq_kernel(const int8_t* packed_blockA, const int8_t* packed_blockB, int8_t* C,
+void q_kernel(const int8_t* packed_blockA, const int8_t* packed_blockB, int8_t* C,
               const int m, const int kc, const int KC, 
               const int n, const int NC, const int N) {
 #if INSTLEVEL >= 9      /* AVX512BW */

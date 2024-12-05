@@ -25,10 +25,10 @@ static D_TYPE parse_dtype(char* dtype) {
         fprintf(stderr, "Unsupported datatype. Use --help for usage.\n");
         exit(EXIT_FAILURE);
     }
-    else if(!strcmp(dtype, "int16") || !strcmp(dtype, "q")) {
+    else if(!strcmp(dtype, "int16") || !strcmp(dtype, "hq")) {
         return D_INT16;
     }
-    else if(!strcmp(dtype, "int8") || !strcmp(dtype, "hq")) {
+    else if(!strcmp(dtype, "int8") || !strcmp(dtype, "q")) {
         return D_INT8;
     }
     else {
@@ -180,11 +180,11 @@ int main(int argc, char* argv[]) {
             break;
         }
         case D_INT16: {
-            qgemm_test(M, N, K, niter, range, bound, file, console_flag);
+            hqgemm_test(M, N, K, niter, range, bound, file, console_flag);
             break;
         }
         case D_INT8: {
-            hqgemm_test(M, N, K, niter, range, bound, file, console_flag);
+            qgemm_test(M, N, K, niter, range, bound, file, console_flag);
             break;
         }
         default: {

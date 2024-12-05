@@ -178,7 +178,7 @@ void igemm_test(const int M, const int N, const int K, const int niter,
     }
 }
 
-void qgemm_test(const int M, const int N, const int K, const int niter,
+void hqgemm_test(const int M, const int N, const int K, const int niter,
                 const int range, const int bound, FILE* file, BOOL console_flag) {
 int error_num = 0;
 
@@ -204,12 +204,12 @@ int error_num = 0;
             double FLOP = 2 * (double)m * n * k;
 
             uint64_t start = timer();
-            qgemm(A, B, C, m, n, k);
+            hqgemm(A, B, C, m, n, k);
             uint64_t end = timer();
             double elapsed = (end - start) * 1e-9;
             double FLOPS = FLOP / elapsed;
 
-            // if(i==0) is_valid_gemm = naive_qgemm(A, B, C, m, n, k);
+            if(i==0) is_valid_gemm = naive_hqgemm(A, B, C, m, n, k);
 
             // if range is not 0, don't print each results
             if(range == 0) {
@@ -237,7 +237,7 @@ int error_num = 0;
     }
 }
 
-void hqgemm_test(const int M, const int N, const int K, const int niter,
+void qgemm_test(const int M, const int N, const int K, const int niter,
                 const int range, const int bound, FILE* file, BOOL console_flag) {
 int error_num = 0;
 
@@ -263,12 +263,12 @@ int error_num = 0;
             double FLOP = 2 * (double)m * n * k;
 
             uint64_t start = timer();
-            hqgemm(A, B, C, m, n, k);
+            qgemm(A, B, C, m, n, k);
             uint64_t end = timer();
             double elapsed = (end - start) * 1e-9;
             double FLOPS = FLOP / elapsed;
 
-            if(i==0) is_valid_gemm = naive_hqgemm(A, B, C, m, n, k);
+            if(i==0) is_valid_gemm = naive_qgemm(A, B, C, m, n, k);
 
             // if range is not 0, don't print each results
             if(range == 0) {
@@ -349,7 +349,7 @@ BOOL naive_igemm(const int* A, const int* B, const int* C,
     return TRUE;
 }
 
-BOOL naive_qgemm(const int16_t* A, const int16_t* B, const int16_t* C,
+BOOL naive_hqgemm(const int16_t* A, const int16_t* B, const int16_t* C,
                 const int M, const int N, const int K) {
     for(int r = 0; r < M; r++) {
         for(int c = 0; c < N; c++) {
@@ -363,7 +363,7 @@ BOOL naive_qgemm(const int16_t* A, const int16_t* B, const int16_t* C,
     return TRUE;
 }
 
-BOOL naive_hqgemm(const int8_t* A, const int8_t* B, const int8_t* C,
+BOOL naive_qgemm(const int8_t* A, const int8_t* B, const int8_t* C,
                 const int M, const int N, const int K) {
     for(int r = 0; r < M; r++) {
         for(int c = 0; c < N; c++) {
