@@ -1,12 +1,22 @@
 #include "gemm.h"
 
 void spack_blockB(const float* B, float* packed_B, const int NR, 
-                 const int nc, const int NC, const int N, const int kc) {
-    int NTHREADS = 8; 
+                 const int nc, const int NC, const int N, 
+                 const int kc, const int NTHREADS) {
 #pragma omp parallel for num_threads(NTHREADS) schedule(static)
     for(int Bb_row = 0; Bb_row < nc; Bb_row += NR) {
         int nr = min(NR, nc - Bb_row);
         spack_panelB(&B[Bb_row], &packed_B[Bb_row], nr, NC, N, kc);
+    }
+}
+
+void spack_blockA(const float* A, float* packed_A, const int MR,
+                const int mc, const int kc, const int KC, 
+                const int K, const int NTHREADS) {
+#pragma omp parallel for num_threads(NTHREADS) schedule(static)
+    for(int Ab_row = 0; Ab_row < mc; Ab_row += MR) { /* split block to small panels */
+        int mr = min(MR, mc - Ab_row);
+        spack_panelA(&A[Ab_row * K], &packed_A[Ab_row * KC], mr, kc, KC, K);
     }
 }
 
@@ -22,16 +32,6 @@ void spack_panelB(const float* B, float* packed_B, const int nr,
     }
 }
 
-void spack_blockA(const float* A, float* packed_A, const int MR,
-                const int mc, const int kc, const int KC, const int K) {
-    int NTHREADS = 8; 
-#pragma omp parallel for num_threads(NTHREADS) schedule(static)
-    for(int Ab_row = 0; Ab_row < mc; Ab_row += MR) { /* split block to small panels */
-        int mr = min(MR, mc - Ab_row);
-        spack_panelA(&A[Ab_row * K], &packed_A[Ab_row * KC], mr, kc, KC, K);
-    }
-}
-
 void spack_panelA(const float* A, float* packed_A, const int mr, 
                 const int kc, const int KC, const int K) {
     for(int Ap_row = 0; Ap_row < mr; Ap_row++) {    /* row access */
@@ -44,12 +44,22 @@ void spack_panelA(const float* A, float* packed_A, const int mr,
     }
 }
 void dpack_blockB(const double* B, double* packed_B, const int NR, 
-                const int nc, const int NC, const int N, const int kc) {
-    int NTHREADS = 8; 
+                const int nc, const int NC, const int N, 
+                const int kc, const int NTHREADS) {
 #pragma omp parallel for num_threads(NTHREADS) schedule(static)
     for(int Bb_row = 0; Bb_row < nc; Bb_row += NR) {
         int nr = min(NR, nc - Bb_row);
         dpack_panelB(&B[Bb_row], &packed_B[Bb_row], nr, NC, N, kc);
+    }
+}
+
+void dpack_blockA(const double* A, double* packed_A, const int MR,
+                const int mc, const int kc, const int KC, 
+                const int K, const int NTHREADS) {
+#pragma omp parallel for num_threads(NTHREADS) schedule(static)
+    for(int Ab_row = 0; Ab_row < mc; Ab_row += MR) { /* split block to small panels */
+        int mr = min(MR, mc - Ab_row);
+        dpack_panelA(&A[Ab_row * K], &packed_A[Ab_row * KC], mr, kc, KC, K);
     }
 }
 
@@ -62,16 +72,6 @@ void dpack_panelB(const double* B, double* packed_B, const int nr,
         // for (int Bp_col = nr; Bp_col < 16; Bp_col++) {
             // *packed_B++ = 0;
         // }
-    }
-}
-
-void dpack_blockA(const double* A, double* packed_A, const int MR,
-                const int mc, const int kc, const int KC, const int K) {
-    int NTHREADS = 8; 
-#pragma omp parallel for num_threads(NTHREADS) schedule(static)
-    for(int Ab_row = 0; Ab_row < mc; Ab_row += MR) { /* split block to small panels */
-        int mr = min(MR, mc - Ab_row);
-        dpack_panelA(&A[Ab_row * K], &packed_A[Ab_row * KC], mr, kc, KC, K);
     }
 }
 
@@ -88,8 +88,8 @@ void dpack_panelA(const double* A, double* packed_A, const int mr,
 }
 
 void ipack_blockB(const int* B, int* packed_B, const int NR, 
-                  const int nc, const int NC, const int N, const int kc) {
-    int NTHREADS = 8; 
+                  const int nc, const int NC, const int N, 
+                  const int kc, const int NTHREADS) {
 #pragma omp parallel for num_threads(NTHREADS) schedule(static)
     for(int Bb_row = 0; Bb_row < nc; Bb_row += NR) {
         int nr = min(NR, nc - Bb_row);
@@ -98,8 +98,8 @@ void ipack_blockB(const int* B, int* packed_B, const int NR,
 }
 
 void ipack_blockA(const int* A, int* packed_A, const int MR,
-                  const int mc, const int kc, const int KC, const int K) {
-    int NTHREADS = 8; 
+                  const int mc, const int kc, const int KC, 
+                  const int K, const int NTHREADS) {
 #pragma omp parallel for num_threads(NTHREADS) schedule(static)
     for(int Ab_row = 0; Ab_row < mc; Ab_row += MR) { /* split block to small panels */
         int mr = min(MR, mc - Ab_row);

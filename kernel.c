@@ -21,7 +21,7 @@ void s_kernel(const float* packed_blockA, const float* packed_blockB, float* C,
               const int n, const int NC, const int N) {
 #if INSTLEVEL >= 8 /* AVX512F */ /* 14x32 kernel */
     __m512 packed_C[14][2]; /* 14x32 */
-    __m512 b0_blockB, b1_blockB, a_blockA;
+    __m512 a_blockA, b0_blockB, b1_blockB;
     __mmask16 packed_mask_0 = (n < 16)  ? 0xFFFF >> (16 - n) : 0xFFFF;
     __mmask16 packed_mask_1 = (n >= 16) ? 0xFFFF >> (32 - n) : 0x0000;
 
@@ -34,60 +34,60 @@ void s_kernel(const float* packed_blockA, const float* packed_blockB, float* C,
         b1_blockB = _mm512_load_ps(packed_blockB + 16);
 
         a_blockA = _mm512_set1_ps(packed_blockA[KC * 0]); 
-        packed_C[0][0] = _mm512_fmadd_ps(b0_blockB, a_blockA, packed_C[0][0]);
-        packed_C[0][1] = _mm512_fmadd_ps(b1_blockB, a_blockA, packed_C[0][1]);
+        packed_C[0][0] = sfma(a_blockA, b0_blockB, packed_C[0][0]);
+        packed_C[0][1] = sfma(a_blockA, b1_blockB, packed_C[0][1]);
 
         a_blockA = _mm512_set1_ps(packed_blockA[KC * 1]); 
-        packed_C[1][0] = _mm512_fmadd_ps(b0_blockB, a_blockA, packed_C[1][0]);
-        packed_C[1][1] = _mm512_fmadd_ps(b1_blockB, a_blockA, packed_C[1][1]);
+        packed_C[1][0] = sfma(a_blockA, b0_blockB, packed_C[1][0]);
+        packed_C[1][1] = sfma(a_blockA, b1_blockB, packed_C[1][1]);
 
         a_blockA = _mm512_set1_ps(packed_blockA[KC * 2]); 
-        packed_C[2][0] = _mm512_fmadd_ps(b0_blockB, a_blockA, packed_C[2][0]);
-        packed_C[2][1] = _mm512_fmadd_ps(b1_blockB, a_blockA, packed_C[2][1]);
+        packed_C[2][0] = sfma(a_blockA, b0_blockB, packed_C[2][0]);
+        packed_C[2][1] = sfma(a_blockA, b1_blockB, packed_C[2][1]);
 
         a_blockA = _mm512_set1_ps(packed_blockA[KC * 3]); 
-        packed_C[3][0] = _mm512_fmadd_ps(b0_blockB, a_blockA, packed_C[3][0]);
-        packed_C[3][1] = _mm512_fmadd_ps(b1_blockB, a_blockA, packed_C[3][1]);
+        packed_C[3][0] = sfma(a_blockA, b0_blockB, packed_C[3][0]);
+        packed_C[3][1] = sfma(a_blockA, b1_blockB, packed_C[3][1]);
 
         a_blockA = _mm512_set1_ps(packed_blockA[KC * 4]); 
-        packed_C[4][0] = _mm512_fmadd_ps(b0_blockB, a_blockA, packed_C[4][0]);
-        packed_C[4][1] = _mm512_fmadd_ps(b1_blockB, a_blockA, packed_C[4][1]);
+        packed_C[4][0] = sfma(a_blockA, b0_blockB, packed_C[4][0]);
+        packed_C[4][1] = sfma(a_blockA, b1_blockB, packed_C[4][1]);
 
         a_blockA = _mm512_set1_ps(packed_blockA[KC * 5]); 
-        packed_C[5][0] = _mm512_fmadd_ps(b0_blockB, a_blockA, packed_C[5][0]);
-        packed_C[5][1] = _mm512_fmadd_ps(b1_blockB, a_blockA, packed_C[5][1]);
+        packed_C[5][0] = sfma(a_blockA, b0_blockB, packed_C[5][0]);
+        packed_C[5][1] = sfma(a_blockA, b1_blockB, packed_C[5][1]);
 
         a_blockA = _mm512_set1_ps(packed_blockA[KC * 6]); 
-        packed_C[6][0] = _mm512_fmadd_ps(b0_blockB, a_blockA, packed_C[6][0]);
-        packed_C[6][1] = _mm512_fmadd_ps(b1_blockB, a_blockA, packed_C[6][1]);
+        packed_C[6][0] = sfma(a_blockA, b0_blockB, packed_C[6][0]);
+        packed_C[6][1] = sfma(a_blockA, b1_blockB, packed_C[6][1]);
 
         a_blockA = _mm512_set1_ps(packed_blockA[KC * 7]); 
-        packed_C[7][0] = _mm512_fmadd_ps(b0_blockB, a_blockA, packed_C[7][0]);
-        packed_C[7][1] = _mm512_fmadd_ps(b1_blockB, a_blockA, packed_C[7][1]);
+        packed_C[7][0] = sfma(a_blockA, b0_blockB, packed_C[7][0]);
+        packed_C[7][1] = sfma(a_blockA, b1_blockB, packed_C[7][1]);
 
         a_blockA = _mm512_set1_ps(packed_blockA[KC * 8]); 
-        packed_C[8][0] = _mm512_fmadd_ps(b0_blockB, a_blockA, packed_C[8][0]);
-        packed_C[8][1] = _mm512_fmadd_ps(b1_blockB, a_blockA, packed_C[8][1]);
+        packed_C[8][0] = sfma(a_blockA, b0_blockB, packed_C[8][0]);
+        packed_C[8][1] = sfma(a_blockA, b1_blockB, packed_C[8][1]);
 
         a_blockA = _mm512_set1_ps(packed_blockA[KC * 9]); 
-        packed_C[9][0] = _mm512_fmadd_ps(b0_blockB, a_blockA, packed_C[9][0]);
-        packed_C[9][1] = _mm512_fmadd_ps(b1_blockB, a_blockA, packed_C[9][1]);
+        packed_C[9][0] = sfma(a_blockA, b0_blockB, packed_C[9][0]);
+        packed_C[9][1] = sfma(a_blockA, b1_blockB, packed_C[9][1]);
 
         a_blockA = _mm512_set1_ps(packed_blockA[KC * 10]); 
-        packed_C[10][0] = _mm512_fmadd_ps(b0_blockB, a_blockA, packed_C[10][0]);
-        packed_C[10][1] = _mm512_fmadd_ps(b1_blockB, a_blockA, packed_C[10][1]);
+        packed_C[10][0] = sfma(a_blockA, b0_blockB, packed_C[10][0]);
+        packed_C[10][1] = sfma(a_blockA, b1_blockB, packed_C[10][1]);
 
         a_blockA = _mm512_set1_ps(packed_blockA[KC * 11]); 
-        packed_C[11][0] = _mm512_fmadd_ps(b0_blockB, a_blockA, packed_C[11][0]);
-        packed_C[11][1] = _mm512_fmadd_ps(b1_blockB, a_blockA, packed_C[11][1]);
+        packed_C[11][0] = sfma(a_blockA, b0_blockB, packed_C[11][0]);
+        packed_C[11][1] = sfma(a_blockA, b1_blockB, packed_C[11][1]);
 
         a_blockA = _mm512_set1_ps(packed_blockA[KC * 12]); 
-        packed_C[12][0] = _mm512_fmadd_ps(b0_blockB, a_blockA, packed_C[12][0]);
-        packed_C[12][1] = _mm512_fmadd_ps(b1_blockB, a_blockA, packed_C[12][1]);
+        packed_C[12][0] = sfma(a_blockA, b0_blockB, packed_C[12][0]);
+        packed_C[12][1] = sfma(a_blockA, b1_blockB, packed_C[12][1]);
 
         a_blockA = _mm512_set1_ps(packed_blockA[KC * 13]); 
-        packed_C[13][0] = _mm512_fmadd_ps(b0_blockB, a_blockA, packed_C[13][0]);
-        packed_C[13][1] = _mm512_fmadd_ps(b1_blockB, a_blockA, packed_C[13][1]);
+        packed_C[13][0] = sfma(a_blockA, b0_blockB, packed_C[13][0]);
+        packed_C[13][1] = sfma(a_blockA, b1_blockB, packed_C[13][1]);
 
         packed_blockA += 1; /* next column */
         packed_blockB += NC; /* next 32 elements*/
@@ -118,28 +118,28 @@ void s_kernel(const float* packed_blockA, const float* packed_blockB, float* C,
         b1_blockB = _mm256_loadu_ps(packed_blockB + 8);
 
         a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 0)); 
-        packed_C[0][0] = S_FMA(a_blockA, b0_blockB, packed_C[0][0]); /* FMA */
-        packed_C[0][1] = S_FMA(a_blockA, b1_blockB, packed_C[0][1]); /* FMA */
+        packed_C[0][0] = sfma(a_blockA, b0_blockB, packed_C[0][0]);
+        packed_C[0][1] = sfma(a_blockA, b1_blockB, packed_C[0][1]);
 
         a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 1)); 
-        packed_C[1][0] = S_FMA(a_blockA, b0_blockB, packed_C[1][0]); /* FMA */
-        packed_C[1][1] = S_FMA(a_blockA, b1_blockB, packed_C[1][1]); /* FMA */
+        packed_C[1][0] = sfma(a_blockA, b0_blockB, packed_C[1][0]);
+        packed_C[1][1] = sfma(a_blockA, b1_blockB, packed_C[1][1]);
 
         a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 2)); 
-        packed_C[2][0] = S_FMA(a_blockA, b0_blockB, packed_C[2][0]); /* FMA */
-        packed_C[2][1] = S_FMA(a_blockA, b1_blockB, packed_C[2][1]); /* FMA */
+        packed_C[2][0] = sfma(a_blockA, b0_blockB, packed_C[2][0]);
+        packed_C[2][1] = sfma(a_blockA, b1_blockB, packed_C[2][1]);
 
         a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 3)); 
-        packed_C[3][0] = S_FMA(a_blockA, b0_blockB, packed_C[3][0]); /* FMA */
-        packed_C[3][1] = S_FMA(a_blockA, b1_blockB, packed_C[3][1]); /* FMA */
+        packed_C[3][0] = sfma(a_blockA, b0_blockB, packed_C[3][0]);
+        packed_C[3][1] = sfma(a_blockA, b1_blockB, packed_C[3][1]);
 
         a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 4)); 
-        packed_C[4][0] = S_FMA(a_blockA, b0_blockB, packed_C[4][0]); /* FMA */
-        packed_C[4][1] = S_FMA(a_blockA, b1_blockB, packed_C[4][1]); /* FMA */
+        packed_C[4][0] = sfma(a_blockA, b0_blockB, packed_C[4][0]);
+        packed_C[4][1] = sfma(a_blockA, b1_blockB, packed_C[4][1]);
 
         a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 5)); 
-        packed_C[5][0] = S_FMA(a_blockA, b0_blockB, packed_C[5][0]); /* FMA */
-        packed_C[5][1] = S_FMA(a_blockA, b1_blockB, packed_C[5][1]); /* FMA */
+        packed_C[5][0] = sfma(a_blockA, b0_blockB, packed_C[5][0]);
+        packed_C[5][1] = sfma(a_blockA, b1_blockB, packed_C[5][1]);
 
         packed_blockA += 1; /* next column */
         packed_blockB += NC; /* next 16 elements*/
@@ -170,28 +170,28 @@ void s_kernel(const float* packed_blockA, const float* packed_blockB, float* C,
         b1_blockB = _mm256_loadu_ps(packed_blockB + 8);
         
         a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 0)); 
-        packed_C[0][0] = S_FMA(a_blockA, b0_blockB, packed_C[0][0]); /* FMA */
-        packed_C[0][1] = S_FMA(a_blockA, b1_blockB, packed_C[0][1]); /* FMA */
+        packed_C[0][0] = sfma(a_blockA, b0_blockB, packed_C[0][0]);
+        packed_C[0][1] = sfma(a_blockA, b1_blockB, packed_C[0][1]);
 
         a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 1)); 
-        packed_C[1][0] = S_FMA(a_blockA, b0_blockB, packed_C[1][0]); /* FMA */
-        packed_C[1][1] = S_FMA(a_blockA, b1_blockB, packed_C[1][1]); /* FMA */
+        packed_C[1][0] = sfma(a_blockA, b0_blockB, packed_C[1][0]);
+        packed_C[1][1] = sfma(a_blockA, b1_blockB, packed_C[1][1]);
 
         a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 2)); 
-        packed_C[2][0] = S_FMA(a_blockA, b0_blockB, packed_C[2][0]); /* FMA */
-        packed_C[2][1] = S_FMA(a_blockA, b1_blockB, packed_C[2][1]); /* FMA */
+        packed_C[2][0] = sfma(a_blockA, b0_blockB, packed_C[2][0]);
+        packed_C[2][1] = sfma(a_blockA, b1_blockB, packed_C[2][1]);
 
         a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 3)); 
-        packed_C[3][0] = S_FMA(a_blockA, b0_blockB, packed_C[3][0]); /* FMA */
-        packed_C[3][1] = S_FMA(a_blockA, b1_blockB, packed_C[3][1]); /* FMA */
+        packed_C[3][0] = sfma(a_blockA, b0_blockB, packed_C[3][0]);
+        packed_C[3][1] = sfma(a_blockA, b1_blockB, packed_C[3][1]);
 
         a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 4)); 
-        packed_C[4][0] = S_FMA(a_blockA, b0_blockB, packed_C[4][0]); /* FMA */
-        packed_C[4][1] = S_FMA(a_blockA, b1_blockB, packed_C[4][1]); /* FMA */
+        packed_C[4][0] = sfma(a_blockA, b0_blockB, packed_C[4][0]);
+        packed_C[4][1] = sfma(a_blockA, b1_blockB, packed_C[4][1]);
 
         a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 5)); 
-        packed_C[5][0] = S_FMA(a_blockA, b0_blockB, packed_C[5][0]); /* FMA */
-        packed_C[5][1] = S_FMA(a_blockA, b1_blockB, packed_C[5][1]); /* FMA */
+        packed_C[5][0] = sfma(a_blockA, b0_blockB, packed_C[5][0]);
+        packed_C[5][1] = sfma(a_blockA, b1_blockB, packed_C[5][1]);
 
         packed_blockA += 1; /* next column */
         packed_blockB += NC; /* next 16 elements*/
@@ -221,28 +221,28 @@ void d_kernel(const double* packed_blockA, const double* packed_blockB, double* 
         b1_blockB = _mm512_load_pd(packed_blockB + 8);
 
         a_blockA = _mm512_set1_pd(packed_blockA[KC * 0]); 
-        packed_C[0][0] = _mm512_fmadd_pd(b0_blockB, a_blockA, packed_C[0][0]);
-        packed_C[0][1] = _mm512_fmadd_pd(b1_blockB, a_blockA, packed_C[0][1]);
+        packed_C[0][0] = dfma(a_blockA, b0_blockB, packed_C[0][0]);
+        packed_C[0][1] = dfma(a_blockA, b1_blockB, packed_C[0][1]);
 
         a_blockA = _mm512_set1_pd(packed_blockA[KC * 1]); 
-        packed_C[1][0] = _mm512_fmadd_pd(b0_blockB, a_blockA, packed_C[1][0]);
-        packed_C[1][1] = _mm512_fmadd_pd(b1_blockB, a_blockA, packed_C[1][1]);
+        packed_C[1][0] = dfma(a_blockA, b0_blockB, packed_C[1][0]);
+        packed_C[1][1] = dfma(a_blockA, b1_blockB, packed_C[1][1]);
         
         a_blockA = _mm512_set1_pd(packed_blockA[KC * 2]); 
-        packed_C[2][0] = _mm512_fmadd_pd(b0_blockB, a_blockA, packed_C[2][0]);
-        packed_C[2][1] = _mm512_fmadd_pd(b1_blockB, a_blockA, packed_C[2][1]);
+        packed_C[2][0] = dfma(a_blockA, b0_blockB, packed_C[2][0]);
+        packed_C[2][1] = dfma(a_blockA, b1_blockB, packed_C[2][1]);
 
         a_blockA = _mm512_set1_pd(packed_blockA[KC * 3]); 
-        packed_C[3][0] = _mm512_fmadd_pd(b0_blockB, a_blockA, packed_C[3][0]);
-        packed_C[3][1] = _mm512_fmadd_pd(b1_blockB, a_blockA, packed_C[3][1]);
+        packed_C[3][0] = dfma(a_blockA, b0_blockB, packed_C[3][0]);
+        packed_C[3][1] = dfma(a_blockA, b1_blockB, packed_C[3][1]);
 
         a_blockA = _mm512_set1_pd(packed_blockA[KC * 4]); 
-        packed_C[4][0] = _mm512_fmadd_pd(b0_blockB, a_blockA, packed_C[4][0]);
-        packed_C[4][1] = _mm512_fmadd_pd(b1_blockB, a_blockA, packed_C[4][1]);
+        packed_C[4][0] = dfma(a_blockA, b0_blockB, packed_C[4][0]);
+        packed_C[4][1] = dfma(a_blockA, b1_blockB, packed_C[4][1]);
 
         a_blockA = _mm512_set1_pd(packed_blockA[KC * 5]); 
-        packed_C[5][0] = _mm512_fmadd_pd(b0_blockB, a_blockA, packed_C[5][0]);
-        packed_C[5][1] = _mm512_fmadd_pd(b1_blockB, a_blockA, packed_C[5][1]);
+        packed_C[5][0] = dfma(a_blockA, b0_blockB, packed_C[5][0]);
+        packed_C[5][1] = dfma(a_blockA, b1_blockB, packed_C[5][1]);
 
         packed_blockA += 1;  /* next column */
         packed_blockB += NC; /* next 16 elements*/
@@ -273,28 +273,28 @@ void d_kernel(const double* packed_blockA, const double* packed_blockB, double* 
         b1_blockB = _mm256_load_pd(packed_blockB + 4);
 
         a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 0));
-        packed_C[0][0] = D_FMA(a_blockA, b0_blockB, packed_C[0][0]);
-        packed_C[0][1] = D_FMA(a_blockA, b1_blockB, packed_C[0][1]);
+        packed_C[0][0] = dfma(a_blockA, b0_blockB, packed_C[0][0]);
+        packed_C[0][1] = dfma(a_blockA, b1_blockB, packed_C[0][1]);
 
         a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 1));
-        packed_C[1][0] = D_FMA(a_blockA, b0_blockB, packed_C[1][0]);
-        packed_C[1][1] = D_FMA(a_blockA, b1_blockB, packed_C[1][1]);
+        packed_C[1][0] = dfma(a_blockA, b0_blockB, packed_C[1][0]);
+        packed_C[1][1] = dfma(a_blockA, b1_blockB, packed_C[1][1]);
 
         a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 2));
-        packed_C[2][0] = D_FMA(a_blockA, b0_blockB, packed_C[2][0]);
-        packed_C[2][1] = D_FMA(a_blockA, b1_blockB, packed_C[2][1]);
+        packed_C[2][0] = dfma(a_blockA, b0_blockB, packed_C[2][0]);
+        packed_C[2][1] = dfma(a_blockA, b1_blockB, packed_C[2][1]);
 
         a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 3));
-        packed_C[3][0] = D_FMA(a_blockA, b0_blockB, packed_C[3][0]);
-        packed_C[3][1] = D_FMA(a_blockA, b1_blockB, packed_C[3][1]);
+        packed_C[3][0] = dfma(a_blockA, b0_blockB, packed_C[3][0]);
+        packed_C[3][1] = dfma(a_blockA, b1_blockB, packed_C[3][1]);
 
         a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 4));
-        packed_C[4][0] = D_FMA(a_blockA, b0_blockB, packed_C[4][0]);
-        packed_C[4][1] = D_FMA(a_blockA, b1_blockB, packed_C[4][1]);
+        packed_C[4][0] = dfma(a_blockA, b0_blockB, packed_C[4][0]);
+        packed_C[4][1] = dfma(a_blockA, b1_blockB, packed_C[4][1]);
 
         a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 5));
-        packed_C[5][0] = D_FMA(a_blockA, b0_blockB, packed_C[5][0]);
-        packed_C[5][1] = D_FMA(a_blockA, b1_blockB, packed_C[5][1]);
+        packed_C[5][0] = dfma(a_blockA, b0_blockB, packed_C[5][0]);
+        packed_C[5][1] = dfma(a_blockA, b1_blockB, packed_C[5][1]);
 
         packed_blockA += 1;  /* next column */
         packed_blockB += NC; /* next 8 elements*/
@@ -324,28 +324,28 @@ void d_kernel(const double* packed_blockA, const double* packed_blockB, double* 
         b1_blockB = _mm256_loadu_pd(packed_blockB + 4);
         
         a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 0));
-        packed_C[0][0] = D_FMA(a_blockA, b0_blockB, packed_C[0][0]);
-        packed_C[0][1] = D_FMA(a_blockA, b1_blockB, packed_C[0][1]);
+        packed_C[0][0] = dfma(a_blockA, b0_blockB, packed_C[0][0]);
+        packed_C[0][1] = dfma(a_blockA, b1_blockB, packed_C[0][1]);
 
         a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 1));
-        packed_C[1][0] = D_FMA(a_blockA, b0_blockB, packed_C[1][0]);
-        packed_C[1][1] = D_FMA(a_blockA, b1_blockB, packed_C[1][1]);
+        packed_C[1][0] = dfma(a_blockA, b0_blockB, packed_C[1][0]);
+        packed_C[1][1] = dfma(a_blockA, b1_blockB, packed_C[1][1]);
 
         a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 2));
-        packed_C[2][0] = D_FMA(a_blockA, b0_blockB, packed_C[2][0]);
-        packed_C[2][1] = D_FMA(a_blockA, b1_blockB, packed_C[2][1]);
+        packed_C[2][0] = dfma(a_blockA, b0_blockB, packed_C[2][0]);
+        packed_C[2][1] = dfma(a_blockA, b1_blockB, packed_C[2][1]);
 
         a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 3));
-        packed_C[3][0] = D_FMA(a_blockA, b0_blockB, packed_C[3][0]);
-        packed_C[3][1] = D_FMA(a_blockA, b1_blockB, packed_C[3][1]);
+        packed_C[3][0] = dfma(a_blockA, b0_blockB, packed_C[3][0]);
+        packed_C[3][1] = dfma(a_blockA, b1_blockB, packed_C[3][1]);
 
         a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 4));
-        packed_C[4][0] = D_FMA(a_blockA, b0_blockB, packed_C[4][0]);
-        packed_C[4][1] = D_FMA(a_blockA, b1_blockB, packed_C[4][1]);
+        packed_C[4][0] = dfma(a_blockA, b0_blockB, packed_C[4][0]);
+        packed_C[4][1] = dfma(a_blockA, b1_blockB, packed_C[4][1]);
 
         a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 5));
-        packed_C[5][0] = D_FMA(a_blockA, b0_blockB, packed_C[5][0]);
-        packed_C[5][1] = D_FMA(a_blockA, b1_blockB, packed_C[5][1]);
+        packed_C[5][0] = dfma(a_blockA, b0_blockB, packed_C[5][0]);
+        packed_C[5][1] = dfma(a_blockA, b1_blockB, packed_C[5][1]);
 
         packed_blockA += 1; /* next column */
         packed_blockB += NC; /* next 16 elements*/
