@@ -375,60 +375,60 @@ void i_kernel(const int* packed_blockA, const int* packed_blockB, int* C,
         b1_blockB = _mm512_load_epi32(packed_blockB + 16);
 
         a_blockA = _mm512_set1_epi32(packed_blockA[KC * 0]); 
-        packed_C[0][0] = _mm512_add_epi32(packed_C[0][0], _mm512_mullo_epi32(b0_blockB, a_blockA));
-        packed_C[0][1] = _mm512_add_epi32(packed_C[0][1], _mm512_mullo_epi32(b1_blockB, a_blockA));
+        packed_C[0][0] = ifma(a_blockA, b0_blockB, packed_C[0][0]);
+        packed_C[0][1] = ifma(a_blockA, b1_blockB, packed_C[0][1]);
 
         a_blockA = _mm512_set1_epi32(packed_blockA[KC * 1]);  
-        packed_C[1][0] = _mm512_add_epi32(packed_C[1][0], _mm512_mullo_epi32(b0_blockB, a_blockA));
-        packed_C[1][1] = _mm512_add_epi32(packed_C[1][1], _mm512_mullo_epi32(b1_blockB, a_blockA));
+        packed_C[1][0] = ifma(a_blockA, b0_blockB, packed_C[1][0]);
+        packed_C[1][1] = ifma(a_blockA, b1_blockB, packed_C[1][1]);
 
         a_blockA = _mm512_set1_epi32(packed_blockA[KC * 2]); 
-        packed_C[2][0] = _mm512_add_epi32(packed_C[2][0], _mm512_mullo_epi32(b0_blockB, a_blockA));
-        packed_C[2][1] = _mm512_add_epi32(packed_C[2][1], _mm512_mullo_epi32(b1_blockB, a_blockA));
+        packed_C[2][0] = ifma(a_blockA, b0_blockB, packed_C[2][0]);
+        packed_C[2][1] = ifma(a_blockA, b1_blockB, packed_C[2][1]);
 
         a_blockA = _mm512_set1_epi32(packed_blockA[KC * 3]); 
-        packed_C[3][0] = _mm512_add_epi32(packed_C[3][0], _mm512_mullo_epi32(b0_blockB, a_blockA));
-        packed_C[3][1] = _mm512_add_epi32(packed_C[3][1], _mm512_mullo_epi32(b1_blockB, a_blockA));
+        packed_C[3][0] = ifma(a_blockA, b0_blockB, packed_C[3][0]);
+        packed_C[3][1] = ifma(a_blockA, b1_blockB, packed_C[3][1]);
 
         a_blockA = _mm512_set1_epi32(packed_blockA[KC * 4]); 
-        packed_C[4][0] = _mm512_add_epi32(packed_C[4][0], _mm512_mullo_epi32(b0_blockB, a_blockA));
-        packed_C[4][1] = _mm512_add_epi32(packed_C[4][1], _mm512_mullo_epi32(b1_blockB, a_blockA));
+        packed_C[4][0] = ifma(a_blockA, b0_blockB, packed_C[4][0]);
+        packed_C[4][1] = ifma(a_blockA, b1_blockB, packed_C[4][1]);
 
         a_blockA = _mm512_set1_epi32(packed_blockA[KC * 5]); 
-        packed_C[5][0] = _mm512_add_epi32(packed_C[5][0], _mm512_mullo_epi32(b0_blockB, a_blockA));
-        packed_C[5][1] = _mm512_add_epi32(packed_C[5][1], _mm512_mullo_epi32(b1_blockB, a_blockA));
+        packed_C[5][0] = ifma(a_blockA, b0_blockB, packed_C[5][0]);
+        packed_C[5][1] = ifma(a_blockA, b1_blockB, packed_C[5][1]);
 
         a_blockA = _mm512_set1_epi32(packed_blockA[KC * 6]); 
-        packed_C[6][0] = _mm512_add_epi32(packed_C[6][0], _mm512_mullo_epi32(b0_blockB, a_blockA));
-        packed_C[6][1] = _mm512_add_epi32(packed_C[6][1], _mm512_mullo_epi32(b1_blockB, a_blockA));
+        packed_C[6][0] = ifma(a_blockA, b0_blockB, packed_C[6][0]);
+        packed_C[6][1] = ifma(a_blockA, b1_blockB, packed_C[6][1]);
 
         a_blockA = _mm512_set1_epi32(packed_blockA[KC * 7]); 
-        packed_C[7][0] = _mm512_add_epi32(packed_C[7][0], _mm512_mullo_epi32(b0_blockB, a_blockA));
-        packed_C[7][1] = _mm512_add_epi32(packed_C[7][1], _mm512_mullo_epi32(b1_blockB, a_blockA));
+        packed_C[7][0] = ifma(a_blockA, b0_blockB, packed_C[7][0]);
+        packed_C[7][1] = ifma(a_blockA, b1_blockB, packed_C[7][1]);
 
         a_blockA = _mm512_set1_epi32(packed_blockA[KC * 8]); 
-        packed_C[8][0] = _mm512_add_epi32(packed_C[8][0], _mm512_mullo_epi32(b0_blockB, a_blockA));
-        packed_C[8][1] = _mm512_add_epi32(packed_C[8][1], _mm512_mullo_epi32(b1_blockB, a_blockA));
+        packed_C[8][0] = ifma(a_blockA, b0_blockB,packed_C[8][0]);
+        packed_C[8][1] = ifma(a_blockA, b1_blockB,packed_C[8][1]);
 
         a_blockA = _mm512_set1_epi32(packed_blockA[KC * 9]); 
-        packed_C[9][0] = _mm512_add_epi32(packed_C[9][0], _mm512_mullo_epi32(b0_blockB, a_blockA));
-        packed_C[9][1] = _mm512_add_epi32(packed_C[9][1], _mm512_mullo_epi32(b1_blockB, a_blockA));
+        packed_C[9][0] = ifma(a_blockA, b0_blockB,packed_C[9][0]);
+        packed_C[9][1] = ifma(a_blockA, b1_blockB,packed_C[9][1]);
 
         a_blockA = _mm512_set1_epi32(packed_blockA[KC * 10]); 
-        packed_C[10][0] = _mm512_add_epi32(packed_C[10][0], _mm512_mullo_epi32(b0_blockB, a_blockA));
-        packed_C[10][1] = _mm512_add_epi32(packed_C[10][1], _mm512_mullo_epi32(b1_blockB, a_blockA));
+        packed_C[10][0] = ifma(a_blockA, b0_blockB,packed_C[10][0]);
+        packed_C[10][1] = ifma(a_blockA, b1_blockB,packed_C[10][1]);
 
         a_blockA = _mm512_set1_epi32(packed_blockA[KC * 11]); 
-        packed_C[11][0] = _mm512_add_epi32(packed_C[11][0], _mm512_mullo_epi32(b0_blockB, a_blockA));
-        packed_C[11][1] = _mm512_add_epi32(packed_C[11][1], _mm512_mullo_epi32(b1_blockB, a_blockA));
+        packed_C[11][0] = ifma(a_blockA, b0_blockB,packed_C[11][0]);
+        packed_C[11][1] = ifma(a_blockA, b1_blockB,packed_C[11][1]);
 
         a_blockA = _mm512_set1_epi32(packed_blockA[KC * 12]); 
-        packed_C[12][0] = _mm512_add_epi32(packed_C[12][0], _mm512_mullo_epi32(b0_blockB, a_blockA));
-        packed_C[12][1] = _mm512_add_epi32(packed_C[12][1], _mm512_mullo_epi32(b1_blockB, a_blockA));
+        packed_C[12][0] = ifma(a_blockA, b0_blockB,packed_C[12][0]);
+        packed_C[12][1] = ifma(a_blockA, b1_blockB,packed_C[12][1]);
 
         a_blockA = _mm512_set1_epi32(packed_blockA[KC * 13]); 
-        packed_C[13][0] = _mm512_add_epi32(packed_C[13][0], _mm512_mullo_epi32(b0_blockB, a_blockA));
-        packed_C[13][1] = _mm512_add_epi32(packed_C[13][1], _mm512_mullo_epi32(b1_blockB, a_blockA));
+        packed_C[13][0] = ifma(a_blockA, b0_blockB,packed_C[13][0]);
+        packed_C[13][1] = ifma(a_blockA, b1_blockB,packed_C[13][1]);
 
         packed_blockA += 1;     /* next column */
         packed_blockB += NC;    /* next 32 elements*/
@@ -459,28 +459,28 @@ void i_kernel(const int* packed_blockA, const int* packed_blockB, int* C,
         b1_blockB = _mm256_loadu_si256((__m256i_u*)(packed_blockB + 8));
 
         a_blockA = _mm256_set1_epi32(packed_blockA[KC * 0]);
-        packed_C[0][0] = _mm256_add_epi32(packed_C[0][0], _mm256_mullo_epi32(b0_blockB, a_blockA)); /* FMA */
-        packed_C[0][1] = _mm256_add_epi32(packed_C[0][1], _mm256_mullo_epi32(b1_blockB, a_blockA)); /* FMA */
+        packed_C[0][0] = ifma(a_blockA, b0_blockB, packed_C[0][0]); /* FMA */
+        packed_C[0][1] = ifma(a_blockA, b1_blockB, packed_C[0][1]); /* FMA */
 
         a_blockA = _mm256_set1_epi32(packed_blockA[KC * 1]);
-        packed_C[1][0] = _mm256_add_epi32(packed_C[1][0], _mm256_mullo_epi32(b0_blockB, a_blockA)); /* FMA */
-        packed_C[1][1] = _mm256_add_epi32(packed_C[1][1], _mm256_mullo_epi32(b1_blockB, a_blockA)); /* FMA */
+        packed_C[1][0] = ifma(a_blockA, b0_blockB, packed_C[1][0]); /* FMA */
+        packed_C[1][1] = ifma(a_blockA, b1_blockB, packed_C[1][1]); /* FMA */
 
         a_blockA = _mm256_set1_epi32(packed_blockA[KC * 2]);
-        packed_C[2][0] = _mm256_add_epi32(packed_C[2][0], _mm256_mullo_epi32(b0_blockB, a_blockA)); /* FMA */
-        packed_C[2][1] = _mm256_add_epi32(packed_C[2][1], _mm256_mullo_epi32(b1_blockB, a_blockA)); /* FMA */
+        packed_C[2][0] = ifma(a_blockA, b0_blockB, packed_C[2][0]); /* FMA */
+        packed_C[2][1] = ifma(a_blockA, b1_blockB, packed_C[2][1]); /* FMA */
 
         a_blockA = _mm256_set1_epi32(packed_blockA[KC * 3]);
-        packed_C[3][0] = _mm256_add_epi32(packed_C[3][0], _mm256_mullo_epi32(b0_blockB, a_blockA)); /* FMA */
-        packed_C[3][1] = _mm256_add_epi32(packed_C[3][1], _mm256_mullo_epi32(b1_blockB, a_blockA)); /* FMA */
+        packed_C[3][0] = ifma(a_blockA, b0_blockB, packed_C[3][0]); /* FMA */
+        packed_C[3][1] = ifma(a_blockA, b1_blockB, packed_C[3][1]); /* FMA */
 
         a_blockA = _mm256_set1_epi32(packed_blockA[KC * 4]);
-        packed_C[4][0] = _mm256_add_epi32(packed_C[4][0], _mm256_mullo_epi32(b0_blockB, a_blockA)); /* FMA */
-        packed_C[4][1] = _mm256_add_epi32(packed_C[4][1], _mm256_mullo_epi32(b1_blockB, a_blockA)); /* FMA */
+        packed_C[4][0] = ifma(a_blockA, b0_blockB, packed_C[4][0]); /* FMA */
+        packed_C[4][1] = ifma(a_blockA, b1_blockB, packed_C[4][1]); /* FMA */
 
         a_blockA = _mm256_set1_epi32(packed_blockA[KC * 5]);
-        packed_C[5][0] = _mm256_add_epi32(packed_C[5][0], _mm256_mullo_epi32(b0_blockB, a_blockA)); /* FMA */
-        packed_C[5][1] = _mm256_add_epi32(packed_C[5][1], _mm256_mullo_epi32(b1_blockB, a_blockA)); /* FMA */
+        packed_C[5][0] = ifma(a_blockA, b0_blockB, packed_C[5][0]); /* FMA */
+        packed_C[5][1] = ifma(a_blockA, b1_blockB, packed_C[5][1]); /* FMA */
 
         packed_blockA += 1;     /* next column */
         packed_blockB += NC;    /* next 16 elements*/

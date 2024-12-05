@@ -46,16 +46,19 @@ void i_kernel(const int* packed_blockA, const int* packed_blockB, int* C,
  #if defined (__AVX512__) || defined (__AVX512F__)
   inline __m512  sfma(__m512 a, __m512 b, __m512 c)    { return _mm512_fmadd_ps(a, b, c); }
   inline __m512d dfma(__m512d a, __m512d b, __m512d c) { return _mm512_fmadd_pd(a, b, c); }
+  inline __m512i ifma(__m512i a, __m512i b, __m512i c) { return _mm512_add_epi32(c, _mm512_mullo_epi32(a, b)); }
  #endif // AVX512
 #elif INSTLEVEL >= 6 /* AVX */
- #if defined (__AVX__) && defined (__FMA__)
+ #if defined (__FMA__)
   inline __m256  sfma(__m256 a, __m256 b, __m256 c)    { return _mm256_fmadd_ps(a, b, c); }
   inline __m256d dfma(__m256d a, __m256d b, __m256d c) { return _mm256_fmadd_pd(a, b, c); }
- #elif defined (__AVX__)
+  inline __m256i ifma(__m256i a, __m256i b, __m256i c) { return _mm256_add_epi32(c, _mm256_mullo_epi32(a, b)); }
+ #else
   inline __m256  sfma(__m256 a, __m256 b, __m256 c)    { return _mm256_add_ps(c, _mm256_mul_ps(a, b)); }
   inline __m256d dfma(__m256d a, __m256d b, __m256d c) { return _mm256_add_pd(c, _mm256_mul_pd(a, b)); }
+  inline __m256i ifma(__m256i a, __m256i b, __m256i c) { return _mm256_add_epi32(c, _mm256_mullo_epi32(a, b)); }
  #endif // AVX, FMA
-#endif 
+#endif // INSTLEVEL
 
 /********************************************************
  *                                                      
