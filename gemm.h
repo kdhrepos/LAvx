@@ -64,6 +64,22 @@ void hq_kernel(const int8_t* packed_blockA, const int8_t* packed_blockB, int8_t*
 #define D_FMA(a, b, c)  _mm256_add_pd((c), (_mm256_mul_pd((a), (b))))
 #endif // D_FMA
 
+inline __m512i int8_mul(__m512i a, __m512i b) {
+  // Convert vectors INT8 to INT16
+  __m512i a_lo = _mm512_cvtepi8_epi16(_mm512_castsi512_si256(a));
+  __m512i a_hi = _mm512_cvtepi8_epi16(_mm512_extracti64x4_epi64(a, 1));
+  __m512i b_lo = _mm512_cvtepi8_epi16(_mm512_castsi512_si256(b));
+  __m512i b_hi = _mm512_cvtepi8_epi16(_mm512_extracti64x4_epi64(b, 1));
+
+  // Multiply vectors in INT16
+  __m512i product_lo = _mm512_mullo_epi16(a_lo, b_lo);
+  __m512i product_hi = _mm512_mullo_epi16(a_hi, b_hi);
+
+  // Combine results to vetor INT8
+  __m512i result = _mm512_packs_epi16(product_lo, product_hi);
+
+  return result;
+}
 
 /********************************************************
  *                                                      

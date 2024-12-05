@@ -608,110 +608,110 @@ void hq_kernel(const int8_t* packed_blockA, const int8_t* packed_blockB, int8_t*
               const int m, const int kc, const int KC, 
               const int n, const int NC, const int N) {
 #if INSTLEVEL >= 9      /* AVX512BW */
-    // __m512i packed_C[30]; /* 30x64 */
-    // __m512i a_blockA, b_blockB;
-    // __mmask64 packed_mask = 0xFFFFFFFFFFFFFFFF >> (64 - n);
+    __m512i packed_C[30]; /* 30x64 */
+    __m512i a_blockA, b_blockB;
+    __mmask64 packed_mask = 0xFFFFFFFFFFFFFFFF >> (64 - n);
 
-    // for (int r = 0; r < m; r++)
-    //     packed_C[r] = _mm512_maskz_loadu_epi8(packed_mask, &C[r * N]);
-    // for(int k = 0; k < kc; k++) {
-    //     b_blockB = _mm512_loadu_epi8(packed_blockB);
+    for (int r = 0; r < m; r++)
+        packed_C[r] = _mm512_maskz_loadu_epi8(packed_mask, &C[r * N]);
+    for(int k = 0; k < kc; k++) {
+        b_blockB = _mm512_loadu_epi8(packed_blockB);
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 0]); 
-    //     packed_C[0] = _mm512_add_epi8(packed_C[0], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 0]); 
+        packed_C[0] = _mm512_add_epi8(packed_C[0], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 1]); 
-    //     packed_C[1] = _mm512_add_epi8(packed_C[1], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 1]); 
+        packed_C[1] = _mm512_add_epi8(packed_C[1], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 2]); 
-    //     packed_C[2] = _mm512_add_epi8(packed_C[2], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 2]); 
+        packed_C[2] = _mm512_add_epi8(packed_C[2], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 3]); 
-    //     packed_C[3] = _mm512_add_epi8(packed_C[3], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 3]); 
+        packed_C[3] = _mm512_add_epi8(packed_C[3], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 4]); 
-    //     packed_C[4] = _mm512_add_epi8(packed_C[4], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 4]); 
+        packed_C[4] = _mm512_add_epi8(packed_C[4], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 5]); 
-    //     packed_C[5] = _mm512_add_epi8(packed_C[5], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 5]); 
+        packed_C[5] = _mm512_add_epi8(packed_C[5], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 6]); 
-    //     packed_C[6] = _mm512_add_epi8(packed_C[6], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 6]); 
+        packed_C[6] = _mm512_add_epi8(packed_C[6], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 7]); 
-    //     packed_C[7] = _mm512_add_epi8(packed_C[7], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 7]); 
+        packed_C[7] = _mm512_add_epi8(packed_C[7], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 8]); 
-    //     packed_C[8] = _mm512_add_epi8(packed_C[8], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 8]); 
+        packed_C[8] = _mm512_add_epi8(packed_C[8], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 9]); 
-    //     packed_C[9] = _mm512_add_epi8(packed_C[9], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 9]); 
+        packed_C[9] = _mm512_add_epi8(packed_C[9], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 10]); 
-    //     packed_C[10] = _mm512_add_epi8(packed_C[10], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 10]); 
+        packed_C[10] = _mm512_add_epi8(packed_C[10], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 11]); 
-    //     packed_C[11] = _mm512_add_epi8(packed_C[11], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 11]); 
+        packed_C[11] = _mm512_add_epi8(packed_C[11], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 12]); 
-    //     packed_C[12] = _mm512_add_epi8(packed_C[12], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 12]); 
+        packed_C[12] = _mm512_add_epi8(packed_C[12], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 13]); 
-    //     packed_C[13] = _mm512_add_epi8(packed_C[13], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 13]); 
+        packed_C[13] = _mm512_add_epi8(packed_C[13], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 14]); 
-    //     packed_C[14] = _mm512_add_epi8(packed_C[14], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 14]); 
+        packed_C[14] = _mm512_add_epi8(packed_C[14], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 15]); 
-    //     packed_C[15] = _mm512_add_epi8(packed_C[15], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 15]); 
+        packed_C[15] = _mm512_add_epi8(packed_C[15], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 16]); 
-    //     packed_C[16] = _mm512_add_epi8(packed_C[16], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 16]); 
+        packed_C[16] = _mm512_add_epi8(packed_C[16], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 17]); 
-    //     packed_C[17] = _mm512_add_epi8(packed_C[17], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 17]); 
+        packed_C[17] = _mm512_add_epi8(packed_C[17], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 18]); 
-    //     packed_C[18] = _mm512_add_epi8(packed_C[18], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 18]); 
+        packed_C[18] = _mm512_add_epi8(packed_C[18], int8_mul(b_blockB, a_blockA));
         
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 19]); 
-    //     packed_C[19] = _mm512_add_epi8(packed_C[19], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 19]); 
+        packed_C[19] = _mm512_add_epi8(packed_C[19], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 20]); 
-    //     packed_C[20] = _mm512_add_epi8(packed_C[20], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 20]); 
+        packed_C[20] = _mm512_add_epi8(packed_C[20], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 21]); 
-    //     packed_C[21] = _mm512_add_epi8(packed_C[21], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 21]); 
+        packed_C[21] = _mm512_add_epi8(packed_C[21], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 22]); 
-    //     packed_C[22] = _mm512_add_epi8(packed_C[22], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 22]); 
+        packed_C[22] = _mm512_add_epi8(packed_C[22], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 23]); 
-    //     packed_C[23] = _mm512_add_epi8(packed_C[23], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 23]); 
+        packed_C[23] = _mm512_add_epi8(packed_C[23], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 24]); 
-    //     packed_C[24] = _mm512_add_epi8(packed_C[24], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 24]); 
+        packed_C[24] = _mm512_add_epi8(packed_C[24], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 25]); 
-    //     packed_C[25] = _mm512_add_epi8(packed_C[25], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 25]); 
+        packed_C[25] = _mm512_add_epi8(packed_C[25], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 26]); 
-    //     packed_C[26] = _mm512_add_epi8(packed_C[26], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 26]); 
+        packed_C[26] = _mm512_add_epi8(packed_C[26], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 27]); 
-    //     packed_C[27] = _mm512_add_epi8(packed_C[27], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 27]); 
+        packed_C[27] = _mm512_add_epi8(packed_C[27], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 28]); 
-    //     packed_C[28] = _mm512_add_epi8(packed_C[28], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 28]); 
+        packed_C[28] = _mm512_add_epi8(packed_C[28], int8_mul(b_blockB, a_blockA));
 
-    //     a_blockA = _mm512_set1_epi8(packed_blockA[KC * 29]); 
-    //     packed_C[29] = _mm512_add_epi8(packed_C[29], _mm512_mullo_epi8(b_blockB, a_blockA));
+        a_blockA = _mm512_set1_epi8(packed_blockA[KC * 29]); 
+        packed_C[29] = _mm512_add_epi8(packed_C[29], int8_mul(b_blockB, a_blockA));
 
-    //     packed_blockA += 1;     /* next column */
-    //     packed_blockB += NC;    /* next 32 elements*/
-    // }
-    // for(int r = 0; r < m; r++)
-    //     _mm512_mask_storeu_epi8(&C[r * N],  packed_mask, packed_C[r]);
+        packed_blockA += 1;     /* next column */
+        packed_blockB += NC;    /* next 32 elements*/
+    }
+    for(int r = 0; r < m; r++)
+        _mm512_mask_storeu_epi8(&C[r * N],  packed_mask, packed_C[r]);
 #elif INSTLEVEL >= 7 /* AVX2 */
 #endif // q_kernel
 }

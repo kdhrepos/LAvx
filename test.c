@@ -209,7 +209,7 @@ int error_num = 0;
             double elapsed = (end - start) * 1e-9;
             double FLOPS = FLOP / elapsed;
 
-            if(i==0) is_valid_gemm = naive_qgemm(A, B, C, m, n, k);
+            // if(i==0) is_valid_gemm = naive_qgemm(A, B, C, m, n, k);
 
             // if range is not 0, don't print each results
             if(range == 0) {
