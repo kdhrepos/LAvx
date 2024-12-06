@@ -71,20 +71,22 @@ void q_kernel(const int8_t* packed_blockA, const int8_t* packed_blockB, int8_t* 
 #endif // INSTLEVEL
 
 inline __m512i int8_mul(__m512i a, __m512i b) {
-  // Convert vectors INT8 to INT16
-  __m512i a_lo = _mm512_cvtepi8_epi16(_mm512_castsi512_si256(a));
-  __m512i a_hi = _mm512_cvtepi8_epi16(_mm512_extracti64x4_epi64(a, 1));
-  __m512i b_lo = _mm512_cvtepi8_epi16(_mm512_castsi512_si256(b));
-  __m512i b_hi = _mm512_cvtepi8_epi16(_mm512_extracti64x4_epi64(b, 1));
+    // Convert vectors INT8 to INT16
+    __m512i a_lo = _mm512_cvtepi8_epi16(_mm512_extracti64x4_epi64(a, 0));
+    __m512i a_hi = _mm512_cvtepi8_epi16(_mm512_extracti64x4_epi64(a, 1));
+    __m512i b_lo = _mm512_cvtepi8_epi16(_mm512_extracti64x4_epi64(b, 0));
+    __m512i b_hi = _mm512_cvtepi8_epi16(_mm512_extracti64x4_epi64(b, 1));
 
-  // Multiply vectors in INT16
-  __m512i product_lo = _mm512_mullo_epi16(a_lo, b_lo);
-  __m512i product_hi = _mm512_mullo_epi16(a_hi, b_hi);
+    // Multiply vectors in INT16
+    __m512i mul_lo = _mm512_mullo_epi16(a_lo, b_lo);
+    __m512i mul_hi = _mm512_mullo_epi16(a_hi, b_hi);
 
-  // Combine results to vetor INT8
-  __m512i result = _mm512_packs_epi16(product_lo, product_hi);
+    // Combine results to vetor INT8
+    __m512i result;
+    result = _mm512_inserti64x4(_mm512_setzero_si512(), _mm512_cvtepi16_epi8(mul_lo), 0);
+    result = _mm512_inserti64x4(result, _mm512_cvtepi16_epi8(mul_hi), 1);
 
-  return result;
+    return result;
 }
 
 /********************************************************
