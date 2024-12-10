@@ -49,45 +49,53 @@ void q_kernel(const int8_t* packed_blockA, const int8_t* packed_blockB, int8_t* 
 
 /********************************************************
  *                                                      
- *          Fused Multiply-Add
+ *          Vector Operation
  *                                                      
 *********************************************************/
-#if INSTLEVEL >= 8 /* AVX512 */
- #if defined (__AVX512__) || defined (__AVX512F__)
-  inline __m512  sfma(__m512 a, __m512 b, __m512 c)    { return _mm512_fmadd_ps(a, b, c); }
-  inline __m512d dfma(__m512d a, __m512d b, __m512d c) { return _mm512_fmadd_pd(a, b, c); }
-  inline __m512i ifma(__m512i a, __m512i b, __m512i c) { return _mm512_add_epi32(c, _mm512_mullo_epi32(a, b)); }
- #endif // AVX512
-#elif INSTLEVEL >= 6 /* AVX */
- #if defined (__FMA__)
-  inline __m256  sfma(__m256 a, __m256 b, __m256 c)    { return _mm256_fmadd_ps(a, b, c); }
-  inline __m256d dfma(__m256d a, __m256d b, __m256d c) { return _mm256_fmadd_pd(a, b, c); }
-  inline __m256i ifma(__m256i a, __m256i b, __m256i c) { return _mm256_add_epi32(c, _mm256_mullo_epi32(a, b)); }
- #else
-  inline __m256  sfma(__m256 a, __m256 b, __m256 c)    { return _mm256_add_ps(c, _mm256_mul_ps(a, b)); }
-  inline __m256d dfma(__m256d a, __m256d b, __m256d c) { return _mm256_add_pd(c, _mm256_mul_pd(a, b)); }
-  inline __m256i ifma(__m256i a, __m256i b, __m256i c) { return _mm256_add_epi32(c, _mm256_mullo_epi32(a, b)); }
- #endif // AVX, FMA
-#endif // INSTLEVEL
+#if INSTLEVEL >= 9 /* AVX512BW */
+#if (defined (__AVX512__) || defined (__AVX512F__))
+inline __m512i qmul(__m512i a, __m512i b) {
+    __m512i a_even = a;
+    __m512i a_odd_shifted = _mm512_and_si512(a, _mm512_set1_epi16(0xff00)); // save odd 
+    __m512i b_even = b;
+    __m512i b_odd_lo = _mm512_srli_epi16(b, 8);
 
-inline __m512i int8_mul(__m512i a, __m512i b) {
-    // Convert vectors INT8 to INT16
-    __m512i a_lo = _mm512_cvtepi8_epi16(_mm512_extracti64x4_epi64(a, 0));
-    __m512i a_hi = _mm512_cvtepi8_epi16(_mm512_extracti64x4_epi64(a, 1));
-    __m512i b_lo = _mm512_cvtepi8_epi16(_mm512_extracti64x4_epi64(b, 0));
-    __m512i b_hi = _mm512_cvtepi8_epi16(_mm512_extracti64x4_epi64(b, 1));
-
-    // Multiply vectors in INT16
-    __m512i mul_lo = _mm512_mullo_epi16(a_lo, b_lo);
-    __m512i mul_hi = _mm512_mullo_epi16(a_hi, b_hi);
-
-    // Combine results to vetor INT8
-    __m512i result;
-    result = _mm512_inserti64x4(_mm512_setzero_si512(), _mm512_cvtepi16_epi8(mul_lo), 0);
-    result = _mm512_inserti64x4(result, _mm512_cvtepi16_epi8(mul_hi), 1);
-
+    __m512i mul_even = _mm512_mullo_epi16(a_even, b_even);
+    __m512i mul_odd  = _mm512_mullo_epi16(a_odd_shifted, b_odd_lo);
+    
+    // blend using the same vector constant we already needed, instead of a k mask
+    // first source operand is a variable not needed later so it can be overwritten
+    __m512i result = _mm512_ternarylogic_epi32(mul_even, _mm512_set1_epi16(0xff00), mul_odd, 0xB8); // 0xB8: B ? C : A
     return result;
 }
+#endif // AVX512F
+#endif          /* INSTLEVEL */
+
+/* FMA */
+#if INSTLEVEL >= 9   /* AVX512BW */
+#if defined (__AVX512BW__) && (defined (__AVX512__) || defined (__AVX512F__))
+inline __m512  sfma(__m512 a, __m512 b, __m512 c)    { return _mm512_fmadd_ps(a, b, c); }
+inline __m512d dfma(__m512d a, __m512d b, __m512d c) { return _mm512_fmadd_pd(a, b, c); }
+inline __m512i ifma(__m512i a, __m512i b, __m512i c) { return _mm512_add_epi32(c, _mm512_mullo_epi32(a, b)); }
+inline __m512i qfma(__m512i a, __m512i b, __m512i c) { return _mm512_add_epi8(c, qmul(a, b)); }
+#endif
+#elif INSTLEVEL >= 8 /* AVX512 */
+#if defined (__AVX512__) || defined (__AVX512F__)
+inline __m512  sfma(__m512 a, __m512 b, __m512 c)    { return _mm512_fmadd_ps(a, b, c); }
+inline __m512d dfma(__m512d a, __m512d b, __m512d c) { return _mm512_fmadd_pd(a, b, c); }
+inline __m512i ifma(__m512i a, __m512i b, __m512i c) { return _mm512_add_epi32(c, _mm512_mullo_epi32(a, b)); }
+#endif // AVX512F
+#elif INSTLEVEL >= 6 /* AVX */
+#if defined (__FMA__)
+inline __m256  sfma(__m256 a, __m256 b, __m256 c)    { return _mm256_fmadd_ps(a, b, c); }
+inline __m256d dfma(__m256d a, __m256d b, __m256d c) { return _mm256_fmadd_pd(a, b, c); }
+inline __m256i ifma(__m256i a, __m256i b, __m256i c) { return _mm256_add_epi32(c, _mm256_mullo_epi32(a, b)); }
+#else  // No FMA
+inline __m256  sfma(__m256 a, __m256 b, __m256 c)    { return _mm256_add_ps(c, _mm256_mul_ps(a, b)); }
+inline __m256d dfma(__m256d a, __m256d b, __m256d c) { return _mm256_add_pd(c, _mm256_mul_pd(a, b)); }
+inline __m256i ifma(__m256i a, __m256i b, __m256i c) { return _mm256_add_epi32(c, _mm256_mullo_epi32(a, b)); }
+#endif // AVX, FMA
+#endif              /* INSTLEVEL */
 
 /********************************************************
  *                                                      

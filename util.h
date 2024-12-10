@@ -19,6 +19,7 @@
 typedef short BOOL;
 #define TRUE 1
 #define FALSE 0
+
 #define min(a,b) ((a) < (b) ? (a) : (b))
 
 typedef enum {D_ALL, D_FP32, D_FP64, D_INT32, D_INT8, D_INT16} D_TYPE;

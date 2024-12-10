@@ -1,21 +1,9 @@
-#include "gemm.h"
-
 /**
  * Micro kernel for GEMM, implemented with Intel SSE intrinsic
- * 
- * INSTLEVEL >= 8 for AVX512F
- *  14x32 kernel vs 31x16 kernel
- *  32 ZMM registers
- *  Use FMA
- * INSTLEVEL >= 7 for AVX2
- *  6x16 kernel
- *  16 YMM registers
- *  Use FMA
- * INSTLEVEL >= 6 for AVX
- *  6x16 kernel
- *  16 YMM registers
- *  No FMA
  */
+
+#include "gemm.h"
+
 void s_kernel(const float* packed_blockA, const float* packed_blockB, float* C,
               const int m, const int kc, const int KC, 
               const int n, const int NC, const int N) {
@@ -612,100 +600,100 @@ void q_kernel(const int8_t* packed_blockA, const int8_t* packed_blockB, int8_t* 
     __m512i a_blockA, b_blockB;
     __mmask64 packed_mask = 0xFFFFFFFFFFFFFFFF >> (64 - n);
 
-    for (int r = 0; r < m; r++)
+    for(int r = 0; r < m; r++)
         packed_C[r] = _mm512_maskz_loadu_epi8(packed_mask, &C[r * N]);
     for(int k = 0; k < kc; k++) {
-        b_blockB = _mm512_loadu_epi8(packed_blockB);
+        b_blockB  = _mm512_loadu_epi8(packed_blockB);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 0]); 
-        packed_C[0] = _mm512_add_epi8(packed_C[0], int8_mul(b_blockB, a_blockA));
+        packed_C[0] = qfma(a_blockA, b_blockB, packed_C[0]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 1]); 
-        packed_C[1] = _mm512_add_epi8(packed_C[1], int8_mul(b_blockB, a_blockA));
+        packed_C[1] = qfma(a_blockA, b_blockB, packed_C[1]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 2]); 
-        packed_C[2] = _mm512_add_epi8(packed_C[2], int8_mul(b_blockB, a_blockA));
+        packed_C[2] = qfma(a_blockA, b_blockB, packed_C[2]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 3]); 
-        packed_C[3] = _mm512_add_epi8(packed_C[3], int8_mul(b_blockB, a_blockA));
+        packed_C[3] = qfma(a_blockA, b_blockB, packed_C[3]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 4]); 
-        packed_C[4] = _mm512_add_epi8(packed_C[4], int8_mul(b_blockB, a_blockA));
+        packed_C[4] = qfma(a_blockA, b_blockB, packed_C[4]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 5]); 
-        packed_C[5] = _mm512_add_epi8(packed_C[5], int8_mul(b_blockB, a_blockA));
+        packed_C[5] = qfma(a_blockA, b_blockB, packed_C[5]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 6]); 
-        packed_C[6] = _mm512_add_epi8(packed_C[6], int8_mul(b_blockB, a_blockA));
+        packed_C[6] = qfma(a_blockA, b_blockB, packed_C[6]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 7]); 
-        packed_C[7] = _mm512_add_epi8(packed_C[7], int8_mul(b_blockB, a_blockA));
+        packed_C[7] = qfma(a_blockA, b_blockB, packed_C[7]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 8]); 
-        packed_C[8] = _mm512_add_epi8(packed_C[8], int8_mul(b_blockB, a_blockA));
+        packed_C[8] = qfma(a_blockA, b_blockB, packed_C[8]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 9]); 
-        packed_C[9] = _mm512_add_epi8(packed_C[9], int8_mul(b_blockB, a_blockA));
+        packed_C[9] = qfma(a_blockA, b_blockB, packed_C[9]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 10]); 
-        packed_C[10] = _mm512_add_epi8(packed_C[10], int8_mul(b_blockB, a_blockA));
+        packed_C[10] = qfma(a_blockA, b_blockB, packed_C[10]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 11]); 
-        packed_C[11] = _mm512_add_epi8(packed_C[11], int8_mul(b_blockB, a_blockA));
+        packed_C[11] = qfma(a_blockA, b_blockB, packed_C[11]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 12]); 
-        packed_C[12] = _mm512_add_epi8(packed_C[12], int8_mul(b_blockB, a_blockA));
+        packed_C[12] = qfma(a_blockA, b_blockB, packed_C[12]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 13]); 
-        packed_C[13] = _mm512_add_epi8(packed_C[13], int8_mul(b_blockB, a_blockA));
+        packed_C[13] = qfma(a_blockA, b_blockB, packed_C[13]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 14]); 
-        packed_C[14] = _mm512_add_epi8(packed_C[14], int8_mul(b_blockB, a_blockA));
+        packed_C[14] = qfma(a_blockA, b_blockB, packed_C[14]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 15]); 
-        packed_C[15] = _mm512_add_epi8(packed_C[15], int8_mul(b_blockB, a_blockA));
+        packed_C[15] = qfma(a_blockA, b_blockB, packed_C[15]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 16]); 
-        packed_C[16] = _mm512_add_epi8(packed_C[16], int8_mul(b_blockB, a_blockA));
+        packed_C[16] = qfma(a_blockA, b_blockB, packed_C[16]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 17]); 
-        packed_C[17] = _mm512_add_epi8(packed_C[17], int8_mul(b_blockB, a_blockA));
+        packed_C[17] = qfma(a_blockA, b_blockB, packed_C[17]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 18]); 
-        packed_C[18] = _mm512_add_epi8(packed_C[18], int8_mul(b_blockB, a_blockA));
+        packed_C[18] = qfma(a_blockA, b_blockB, packed_C[18]);
         
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 19]); 
-        packed_C[19] = _mm512_add_epi8(packed_C[19], int8_mul(b_blockB, a_blockA));
+        packed_C[19] = qfma(a_blockA, b_blockB, packed_C[19]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 20]); 
-        packed_C[20] = _mm512_add_epi8(packed_C[20], int8_mul(b_blockB, a_blockA));
+        packed_C[20] = qfma(a_blockA, b_blockB, packed_C[20]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 21]); 
-        packed_C[21] = _mm512_add_epi8(packed_C[21], int8_mul(b_blockB, a_blockA));
+        packed_C[21] = qfma(a_blockA, b_blockB, packed_C[21]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 22]); 
-        packed_C[22] = _mm512_add_epi8(packed_C[22], int8_mul(b_blockB, a_blockA));
+        packed_C[22] = qfma(a_blockA, b_blockB, packed_C[22]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 23]); 
-        packed_C[23] = _mm512_add_epi8(packed_C[23], int8_mul(b_blockB, a_blockA));
+        packed_C[23] = qfma(a_blockA, b_blockB, packed_C[23]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 24]); 
-        packed_C[24] = _mm512_add_epi8(packed_C[24], int8_mul(b_blockB, a_blockA));
+        packed_C[24] = qfma(a_blockA, b_blockB, packed_C[24]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 25]); 
-        packed_C[25] = _mm512_add_epi8(packed_C[25], int8_mul(b_blockB, a_blockA));
+        packed_C[25] = qfma(a_blockA, b_blockB, packed_C[25]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 26]); 
-        packed_C[26] = _mm512_add_epi8(packed_C[26], int8_mul(b_blockB, a_blockA));
+        packed_C[26] = qfma(a_blockA, b_blockB, packed_C[26]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 27]); 
-        packed_C[27] = _mm512_add_epi8(packed_C[27], int8_mul(b_blockB, a_blockA));
+        packed_C[27] = qfma(a_blockA, b_blockB, packed_C[27]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 28]); 
-        packed_C[28] = _mm512_add_epi8(packed_C[28], int8_mul(b_blockB, a_blockA));
+        packed_C[28] = qfma(a_blockA, b_blockB, packed_C[28]);
 
         a_blockA = _mm512_set1_epi8(packed_blockA[KC * 29]); 
-        packed_C[29] = _mm512_add_epi8(packed_C[29], int8_mul(b_blockB, a_blockA));
+        packed_C[29] = qfma(a_blockA, b_blockB, packed_C[29]);
 
         packed_blockA += 1;     /* next column */
         packed_blockB += NC;    /* next 32 elements*/
