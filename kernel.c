@@ -1,10 +1,10 @@
 /**
- * Micro kernel for GEMM, implemented with Intel SSE intrinsic
+ * Micro kernel for GEMM, implemented with Intel SIMD intrinsic
  */
 
 #include "gemm.h"
 
-void s_kernel(const float* packed_blockA, const float* packed_blockB, float* C,
+void skernel(const float* packed_blockA, const float* packed_blockB, float* C,
               const int m, const int kc, const int KC, 
               const int n, const int NC, const int N) {
 #if INSTLEVEL >= 8 /* AVX512F */ /* 14x32 kernel */
@@ -84,61 +84,9 @@ void s_kernel(const float* packed_blockA, const float* packed_blockB, float* C,
         _mm512_mask_storeu_ps(&C[r * N + 0], packed_mask_0, packed_C[r][0]);
         _mm512_mask_storeu_ps(&C[r * N + 16], packed_mask_1, packed_C[r][1]);
     }
-#elif INSTLEVEL >= 7 /* AVX2 */ /* 6x16 kernel */
+#elif INSTLEVEL >= 6 /* AVX, AVX2 */ /* 6x16 kernel */
     __m256 packed_C[6][2]; /* 6x16 */
-    __m256 b0_blockB, b1_blockB, a_blockA;
-    __m256i packed_mask[2];
-
-    static int32_t mask[32] __attribute__((aligned(32))) = {
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
-    };
-    
-    packed_mask[0] = _mm256_loadu_si256((__m256i_u*)&mask[16 - n + 0]);
-    packed_mask[1] = _mm256_loadu_si256((__m256i_u*)&mask[16 - n + 8]);
-    
-    for (int r = 0; r < m; r++) {
-        packed_C[r][0] = _mm256_maskload_ps(&C[r * N + 0], packed_mask[0]);
-        packed_C[r][1] = _mm256_maskload_ps(&C[r * N + 8], packed_mask[1]);
-    }
-    for(int k = 0; k < kc; k++) {
-        b0_blockB = _mm256_loadu_ps(packed_blockB + 0);
-        b1_blockB = _mm256_loadu_ps(packed_blockB + 8);
-
-        a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 0)); 
-        packed_C[0][0] = sfma(a_blockA, b0_blockB, packed_C[0][0]);
-        packed_C[0][1] = sfma(a_blockA, b1_blockB, packed_C[0][1]);
-
-        a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 1)); 
-        packed_C[1][0] = sfma(a_blockA, b0_blockB, packed_C[1][0]);
-        packed_C[1][1] = sfma(a_blockA, b1_blockB, packed_C[1][1]);
-
-        a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 2)); 
-        packed_C[2][0] = sfma(a_blockA, b0_blockB, packed_C[2][0]);
-        packed_C[2][1] = sfma(a_blockA, b1_blockB, packed_C[2][1]);
-
-        a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 3)); 
-        packed_C[3][0] = sfma(a_blockA, b0_blockB, packed_C[3][0]);
-        packed_C[3][1] = sfma(a_blockA, b1_blockB, packed_C[3][1]);
-
-        a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 4)); 
-        packed_C[4][0] = sfma(a_blockA, b0_blockB, packed_C[4][0]);
-        packed_C[4][1] = sfma(a_blockA, b1_blockB, packed_C[4][1]);
-
-        a_blockA = _mm256_broadcast_ss(packed_blockA + (KC * 5)); 
-        packed_C[5][0] = sfma(a_blockA, b0_blockB, packed_C[5][0]);
-        packed_C[5][1] = sfma(a_blockA, b1_blockB, packed_C[5][1]);
-
-        packed_blockA += 1; /* next column */
-        packed_blockB += NC; /* next 16 elements*/
-    }
-    for(int r = 0; r < m; r++) {
-        _mm256_maskstore_ps(&C[r * N + 0], packed_mask[0], packed_C[r][0]);
-        _mm256_maskstore_ps(&C[r * N + 8], packed_mask[1], packed_C[r][1]);
-    }
-#elif INSTLEVEL >= 6 /* AVX */ /* 6x16 kernel */
-    __m256 packed_C[6][2]; /* 6x16 */
-    __m256 b0_blockB, b1_blockB, a_blockA;
+    __m256 a_blockA, b0_blockB, b1_blockB;
     __m256i packed_mask[2];
 
     static int32_t mask[32] __attribute__((aligned(32))) = {
@@ -188,10 +136,10 @@ void s_kernel(const float* packed_blockA, const float* packed_blockB, float* C,
         _mm256_maskstore_ps(&C[r * N + 0], packed_mask[0], packed_C[r][0]);
         _mm256_maskstore_ps(&C[r * N + 8], packed_mask[1], packed_C[r][1]);
     }
-#endif
+#endif // skernel
 }
 
-void d_kernel(const double* packed_blockA, const double* packed_blockB, double* C,
+void dkernel(const double* packed_blockA, const double* packed_blockB, double* C,
               const int m, const int kc, const int KC, 
               const int n, const int NC, const int N) {
 #if INSTLEVEL >= 8 /* AVX512F */ /* 6x16 kernel */
@@ -239,59 +187,7 @@ void d_kernel(const double* packed_blockA, const double* packed_blockB, double* 
         _mm512_mask_storeu_pd(&C[r * N + 0], packed_mask_0, packed_C[r][0]);
         _mm512_mask_storeu_pd(&C[r * N + 8], packed_mask_1, packed_C[r][1]);
     }
-#elif INSTLEVEL >= 7 /* AVX2 */ /* 6x8 kernel */
-    __m256d packed_C[6][2]; /* 6x8 */
-    __m256d a_blockA, b0_blockB, b1_blockB;
-    __m256i packed_mask[2];
-
-    static int64_t mask[16] = {
-        -1, -1, -1, -1, -1, -1, -1, -1, 
-        0,  0,  0,  0,  0,  0,  0,  0
-    };
-
-    packed_mask[0] = _mm256_loadu_si256((__m256i_u*)&mask[8 - n + 0]);
-    packed_mask[1] = _mm256_loadu_si256((__m256i_u*)&mask[8 - n + 4]);
-
-    for (int r = 0; r < m; r++) {
-        packed_C[r][0] = _mm256_maskload_pd(&C[r * N + 0],  packed_mask[0]);
-        packed_C[r][1] = _mm256_maskload_pd(&C[r * N + 4],  packed_mask[1]);
-    }
-    for(int k = 0; k < kc; k++) {
-        b0_blockB = _mm256_load_pd(packed_blockB + 0);
-        b1_blockB = _mm256_load_pd(packed_blockB + 4);
-
-        a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 0));
-        packed_C[0][0] = dfma(a_blockA, b0_blockB, packed_C[0][0]);
-        packed_C[0][1] = dfma(a_blockA, b1_blockB, packed_C[0][1]);
-
-        a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 1));
-        packed_C[1][0] = dfma(a_blockA, b0_blockB, packed_C[1][0]);
-        packed_C[1][1] = dfma(a_blockA, b1_blockB, packed_C[1][1]);
-
-        a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 2));
-        packed_C[2][0] = dfma(a_blockA, b0_blockB, packed_C[2][0]);
-        packed_C[2][1] = dfma(a_blockA, b1_blockB, packed_C[2][1]);
-
-        a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 3));
-        packed_C[3][0] = dfma(a_blockA, b0_blockB, packed_C[3][0]);
-        packed_C[3][1] = dfma(a_blockA, b1_blockB, packed_C[3][1]);
-
-        a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 4));
-        packed_C[4][0] = dfma(a_blockA, b0_blockB, packed_C[4][0]);
-        packed_C[4][1] = dfma(a_blockA, b1_blockB, packed_C[4][1]);
-
-        a_blockA = _mm256_broadcast_sd(packed_blockA + (KC * 5));
-        packed_C[5][0] = dfma(a_blockA, b0_blockB, packed_C[5][0]);
-        packed_C[5][1] = dfma(a_blockA, b1_blockB, packed_C[5][1]);
-
-        packed_blockA += 1;  /* next column */
-        packed_blockB += NC; /* next 8 elements*/
-    }
-    for(int r = 0; r < m; r++) {
-        _mm256_maskstore_pd(&C[r * N + 0],  packed_mask[0], packed_C[r][0]);
-        _mm256_maskstore_pd(&C[r * N + 4],  packed_mask[1], packed_C[r][1]);
-    }
-#elif INSTLEVEL >= 6 /* AVX */ /* 6x8 kernel */
+#elif INSTLEVEL >= 6 /* AVX, AVX2 */ /* 6x8 kernel */
     __m256d packed_C[6][2]; /* 6x8 */
     __m256d a_blockA, b0_blockB, b1_blockB;
     __m256i packed_mask[2];
@@ -342,10 +238,10 @@ void d_kernel(const double* packed_blockA, const double* packed_blockB, double* 
         _mm256_maskstore_pd(&C[r * N + 0], packed_mask[0], packed_C[r][0]);
         _mm256_maskstore_pd(&C[r * N + 4], packed_mask[1], packed_C[r][1]);
     }
-#endif // d_kernel
+#endif // dkernel
 }
 
-void i_kernel(const int* packed_blockA, const int* packed_blockB, int* C,
+void ikernel(const int* packed_blockA, const int* packed_blockB, int* C,
               const int m, const int kc, const int KC, 
               const int n, const int NC, const int N) {
 #if INSTLEVEL >= 8      /* AVX512F */   /* 14x32 kernel */
@@ -477,10 +373,13 @@ void i_kernel(const int* packed_blockA, const int* packed_blockB, int* C,
         _mm256_maskstore_epi32(&C[r * N + 0], packed_mask[0], packed_C[r][0]);
         _mm256_maskstore_epi32(&C[r * N + 8], packed_mask[1], packed_C[r][1]);
     }
-#endif // i_kernel
+#elif INSTLEVEL >= 6 /* AVX */
+// TODO: implement with SSE instructions
+// since there are no useful int32 instructions in AVX extension
+#endif // ikernel
 }
 
-void hq_kernel(const int16_t* packed_blockA, const int16_t* packed_blockB, int16_t* C,
+void hqkernel(const int16_t* packed_blockA, const int16_t* packed_blockB, int16_t* C,
               const int m, const int kc, const int KC, 
               const int n, const int NC, const int N) {
 #if INSTLEVEL >= 9      /* AVX512BW */
@@ -589,10 +488,11 @@ void hq_kernel(const int16_t* packed_blockA, const int16_t* packed_blockB, int16
     for(int r = 0; r < m; r++)
         _mm512_mask_storeu_epi16(&C[r * N],  packed_mask, packed_C[r]);
 #elif INSTLEVEL >= 7 /* AVX2 */
-#endif // q_kernel
+// TODO: implement
+#endif // hqkernel
 }
 
-void q_kernel(const int8_t* packed_blockA, const int8_t* packed_blockB, int8_t* C,
+void qkernel(const int8_t* packed_blockA, const int8_t* packed_blockB, int8_t* C,
               const int m, const int kc, const int KC, 
               const int n, const int NC, const int N) {
 #if INSTLEVEL >= 9      /* AVX512BW */
@@ -701,5 +601,6 @@ void q_kernel(const int8_t* packed_blockA, const int8_t* packed_blockB, int8_t* 
     for(int r = 0; r < m; r++)
         _mm512_mask_storeu_epi8(&C[r * N],  packed_mask, packed_C[r]);
 #elif INSTLEVEL >= 7 /* AVX2 */
-#endif // q_kernel
+// TODO: implement
+#endif // qkernel
 }
