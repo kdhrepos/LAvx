@@ -66,10 +66,10 @@ static void help() {
     fprintf(stderr, "  -h, --help             Print this help message\n");
     fprintf(stderr, "  -t, --type=<dtype>     Data type \n");
     fprintf(stderr, "                         s:  float \n");
-    fprintf(stderr, "                         d:  double \n");
+    fprintf(stderr, "                         d:  double\n");
     fprintf(stderr, "                         i:  int32 \n");
-    fprintf(stderr, "                         q:  int16  " "[Unsupported]\n");
-    fprintf(stderr, "                         hq: int8   " "[Unsupported]\n");
+    fprintf(stderr, "                         q:  int16 \n");
+    fprintf(stderr, "                         hq: int8  \n");
     fprintf(stderr, "                         h:  hfloat " "[Unsupported]\n");
     fprintf(stderr, "                         bf: bfloat " "[Unsupported]\n");
     fprintf(stderr, "  -i, --iter=<num>       Number of iteration for each M, K, N \n");
