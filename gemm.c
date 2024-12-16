@@ -1,3 +1,23 @@
+/**********************************************************************************************
+ * File   : gemm.c
+ * Author : kdh     
+ * Github : https://github.com/kdhrepos/gemm.h
+ * 
+ * Description: 
+ *      Definitions for main gemm functions. These functions have most important algorithms
+ *      for one gemm operation. 
+ * 
+ *      Those are also optimized with hardware implemented in [opt.c] and they use 
+ *      kernels in [kernel.c] and pack functions in [pack.c]
+ *      
+ *      The letter in front of gemm means a data type. For example, "s" in "sgemm" means
+ *      32-bit floating point data type.
+ * 
+ * Reference:
+ *      https://github.com/salykova/matmul.c
+ *                                                    
+**********************************************************************************************/
+
 #include "gemm.h"
 
 void sgemm(const float* A, const float* B, float* C,

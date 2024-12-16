@@ -1,6 +1,21 @@
-/**
- * Micro kernel for GEMM, implemented with Intel SIMD intrinsic
- */
+/**********************************************************************************************
+ * File   : kernel.c
+ * Author : kdh     
+ * Github : https://github.com/kdhrepos/gemm.h
+ * 
+ * Description: 
+ *      Our gemm basically based on divide and conquer approach, which follows GotoBLAS.
+ *      These kernels are the smallest ones that do matrix multiplication.
+ * 
+ *      They are all implemented with Intel SIMD intrisic, based on INSTLEVEL macro in
+ *      [sse.h]
+ *      
+ *      The letter in front of kernel means a data type. For example, "s" in "skernel" means
+ *      32-bit floating point data type.
+ * Reference:
+ *      https://github.com/salykova/matmul.c    
+ *        
+**********************************************************************************************/
 
 #include "gemm.h"
 

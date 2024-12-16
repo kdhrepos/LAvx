@@ -1,3 +1,13 @@
+/**********************************************************************************************
+ * File   : util.h
+ * Author : kdh     
+ * Github : https://github.com/kdhrepos/gemm.h
+ * 
+ * Description: 
+ *      Header file used for some util functions and inclusion of libraries.
+ * 
+**********************************************************************************************/
+
 #ifndef UTIL_H
 #define UTIL_H
 

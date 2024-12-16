@@ -1,3 +1,18 @@
+/**********************************************************************************************
+ * File   : sse.h
+ * Author : kdh     
+ * Github : https://github.com/kdhrepos/gemm.h
+ * 
+ * Description: 
+ *      This header file determines whether SIMD extensions can be used or not.
+ *      If a certain extension can be used, then INSTLEVEL is added up.
+ *      All the necessary Intel SIMD instrinsics depend on this [INSTLEVEL] macro.
+ * 
+ * Reference:
+ *    https://github.com/vectorclass/version2/blob/master/instrset.h
+ *                                                    
+**********************************************************************************************/
+
 #ifndef SSE_H
 #define SSE_H
 
@@ -24,9 +39,19 @@
 //      #include <spe.h>
  #endif
 
-// #if defined (__AVX512VL__)
-// #if defined (__AVX512F__) || defined ( __AVX512__ )
-// #if defined ( __AVX512VNNI__ )
+// The following values of INSTRSET are currently defined:
+// 2:  SSE2
+// 3:  SSE3
+// 4:  SSSE3
+// 5:  SSE4.1
+// 6:  SSE4.2
+// 7:  AVX
+// 8:  AVX2
+// 9:  AVX512F
+// 10: AVX512BW/DQ/VL
+// In the future, INSTRSET = 11 may include AVX512VBMI and AVX512VBMI2, but this
+// decision cannot be made before the market situation for CPUs with these
+// instruction sets is better known
 
 // TODO: Define another macros (or not...?)
  #ifndef INSTLEVEL

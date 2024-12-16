@@ -1,3 +1,14 @@
+/**********************************************************************************************
+ * File   : pack.c
+ * Author : kdh     
+ * Github : https://github.com/kdhrepos/gemm.h
+ * 
+ * Description: 
+ *      This file contains implementations of functions for packing blocks of matrices
+ *      into a format optimized for TLB efficiency in GEMM operations.
+ *                                                    
+**********************************************************************************************/
+
 #include "gemm.h"
 
 void spack_blockB(const float* B, float* packed_B, const int NR, 

@@ -1,3 +1,14 @@
+/**********************************************************************************************
+ * File   : opt.c
+ * Author : kdh     
+ * Github : https://github.com/kdhrepos/gemm.h
+ * 
+ * Description: 
+ *      This file contains implementations of functions to make GEMM to be 
+ *      well-optimized on hardware such as the number of CPU threads and cache size
+ *                                                    
+**********************************************************************************************/
+
 #include "gemm.h"
 
 /**

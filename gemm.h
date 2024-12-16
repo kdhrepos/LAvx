@@ -1,3 +1,14 @@
+/**********************************************************************************************
+ * File   : gemm.h
+ * Author : kdh     
+ * Github : https://github.com/kdhrepos/gemm.h
+ * 
+ * Description: 
+ *      Header file that declares almost all of the necessary functions for GEMM operation.
+ *      All functions are separated based on their own features.
+ *                                                    
+**********************************************************************************************/
+
 #ifndef GEMM_H
 #define GEMM_H 1
 
@@ -13,7 +24,6 @@
  *          GEMM                              
  *                                                      
 *********************************************************/
-
 void sgemm(const float* A, const float* B, float* C,
            const int M, const int N, const int K);
 void dgemm(const double* A, const double* B, double* C,
@@ -30,7 +40,6 @@ void qgemm(const int8_t* A, const int8_t* B, int8_t* C,
  *          Kernel
  *                                                      
 *********************************************************/
-
 void skernel(const float* packed_blockA, const float* packed_blockB, float* C,
               const int m, const int kc, const int KC, 
               const int n, const int NC, const int N);
@@ -89,7 +98,6 @@ __m256i ifma(__m256i a, __m256i b, __m256i c);
  *          Matrix Pack
  *                                                      
 *********************************************************/
-
 void spack_blockB(const float* B, float* packed_B, const int NR, 
                   const int nc, const int NC, const int N, 
                   const int kc, const int NTHREADS);
