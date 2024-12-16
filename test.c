@@ -385,36 +385,46 @@ BOOL naive_qgemm(const int8_t* A, const int8_t* B, const int8_t* C,
 void int32_get_rand_mat(int row, int col, int32_t* mat, int bound) {
     srand(time(NULL));
     for (int r = 0; r < row; r++)
-        for (int c = 0; c < col; c++)
-            mat[r * col + c] = (rand() % bound);
+        for (int c = 0; c < col; c++) {
+            int32_t num = rand() % bound;
+            mat[r * col + c] = num<=bound/2 ? -num : num;
+        }
 }
 
 void fp32_get_rand_mat(int row, int col, float* mat, int bound) {
     srand(time(NULL));
     for (int r = 0; r < row; r++)
-        for (int c = 0; c < col; c++)
-            mat[r * col + c] = (rand() % bound);
+        for (int c = 0; c < col; c++) {
+            float num = rand() % bound;
+            mat[r * col + c] = num<=bound/2 ? -num : num;
+        }
 }
 
 void fp64_get_rand_mat(int row, int col, double* mat, int bound) {
     srand(time(NULL));
     for (int r = 0; r < row; r++)
-        for (int c = 0; c < col; c++)
-            mat[r * col + c] = (rand() % bound);
+        for (int c = 0; c < col; c++) {
+            double num = rand() % bound;
+            mat[r * col + c] = num<=bound/2 ? -num : num;
+        }
 }
 
 void int16_get_rand_mat(int row, int col, int16_t* mat, int bound) {
     srand(time(NULL));
     for (int r = 0; r < row; r++)
-        for (int c = 0; c < col; c++)
-            mat[r * col + c] = (rand() % bound);
+        for (int c = 0; c < col; c++) {
+            int16_t num = rand() % bound;
+            mat[r * col + c] = num<=bound/2 ? -num : num;
+        }
 }
 
 void int8_get_rand_mat(int row, int col, int8_t* mat, int bound) {
     srand(time(NULL));
     for (int r = 0; r < row; r++)
-        for (int c = 0; c < col; c++)
-            mat[r * col + c] = (rand() % bound);
+        for (int c = 0; c < col; c++) {
+            int8_t num = rand() % bound;
+            mat[r * col + c] = num<=bound/2 ? -num : num;
+        }
 }
 
 /********************************************************
