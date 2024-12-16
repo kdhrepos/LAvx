@@ -31,69 +31,56 @@ void qgemm(const int8_t* A, const int8_t* B, int8_t* C,
  *                                                      
 *********************************************************/
 
-void s_kernel(const float* packed_blockA, const float* packed_blockB, float* C,
+void skernel(const float* packed_blockA, const float* packed_blockB, float* C,
               const int m, const int kc, const int KC, 
               const int n, const int NC, const int N);
-void d_kernel(const double* packed_blockA, const double* packed_blockB, double* C,
+void dkernel(const double* packed_blockA, const double* packed_blockB, double* C,
               const int m, const int kc, const int KC, 
               const int n, const int NC, const int N);
-void i_kernel(const int* packed_blockA, const int* packed_blockB, int* C,
+void ikernel(const int* packed_blockA, const int* packed_blockB, int* C,
               const int m, const int kc, const int KC, 
               const int n, const int NC, const int N);
-void hq_kernel(const int16_t* packed_blockA, const int16_t* packed_blockB, int16_t* C,
+void hqkernel(const int16_t* packed_blockA, const int16_t* packed_blockB, int16_t* C,
               const int m, const int kc, const int KC, 
               const int n, const int NC, const int N);
-void q_kernel(const int8_t* packed_blockA, const int8_t* packed_blockB, int8_t* C,
+void qkernel(const int8_t* packed_blockA, const int8_t* packed_blockB, int8_t* C,
               const int m, const int kc, const int KC, 
               const int n, const int NC, const int N);
 
 /********************************************************
  *                                                      
- *          Vector Operation
+ *          Arithmetic Operation
  *                                                      
 *********************************************************/
 #if INSTLEVEL >= 9 /* AVX512BW */
 #if (defined (__AVX512__) || defined (__AVX512F__))
-inline __m512i qmul(__m512i a, __m512i b) {
-    __m512i a_even = a;
-    __m512i a_odd_shifted = _mm512_and_si512(a, _mm512_set1_epi16(0xff00)); // save odd 
-    __m512i b_even = b;
-    __m512i b_odd_lo = _mm512_srli_epi16(b, 8);
-
-    __m512i mul_even = _mm512_mullo_epi16(a_even, b_even);
-    __m512i mul_odd  = _mm512_mullo_epi16(a_odd_shifted, b_odd_lo);
-    
-    // blend using the same vector constant we already needed, instead of a k mask
-    // first source operand is a variable not needed later so it can be overwritten
-    __m512i result = _mm512_ternarylogic_epi32(mul_even, _mm512_set1_epi16(0xff00), mul_odd, 0xB8); // 0xB8: B ? C : A
-    return result;
-}
+__m512i qmul(__m512i a, __m512i b);
 #endif // AVX512F
 #endif          /* INSTLEVEL */
 
 /* FMA */
 #if INSTLEVEL >= 9   /* AVX512BW */
 #if defined (__AVX512BW__) && (defined (__AVX512__) || defined (__AVX512F__))
-inline __m512  sfma(__m512 a, __m512 b, __m512 c)    { return _mm512_fmadd_ps(a, b, c); }
-inline __m512d dfma(__m512d a, __m512d b, __m512d c) { return _mm512_fmadd_pd(a, b, c); }
-inline __m512i ifma(__m512i a, __m512i b, __m512i c) { return _mm512_add_epi32(c, _mm512_mullo_epi32(a, b)); }
-inline __m512i qfma(__m512i a, __m512i b, __m512i c) { return _mm512_add_epi8(c, qmul(a, b)); }
+__m512  sfma(__m512 a, __m512 b, __m512 c)   ;
+__m512d dfma(__m512d a, __m512d b, __m512d c);
+__m512i ifma(__m512i a, __m512i b, __m512i c);
+__m512i qfma(__m512i a, __m512i b, __m512i c);
 #endif
 #elif INSTLEVEL >= 8 /* AVX512 */
 #if defined (__AVX512__) || defined (__AVX512F__)
-inline __m512  sfma(__m512 a, __m512 b, __m512 c)    { return _mm512_fmadd_ps(a, b, c); }
-inline __m512d dfma(__m512d a, __m512d b, __m512d c) { return _mm512_fmadd_pd(a, b, c); }
-inline __m512i ifma(__m512i a, __m512i b, __m512i c) { return _mm512_add_epi32(c, _mm512_mullo_epi32(a, b)); }
+__m512  sfma(__m512 a, __m512 b, __m512 c)   ;
+__m512d dfma(__m512d a, __m512d b, __m512d c);
+__m512i ifma(__m512i a, __m512i b, __m512i c);
 #endif // AVX512F
 #elif INSTLEVEL >= 6 /* AVX */
 #if defined (__FMA__)
-inline __m256  sfma(__m256 a, __m256 b, __m256 c)    { return _mm256_fmadd_ps(a, b, c); }
-inline __m256d dfma(__m256d a, __m256d b, __m256d c) { return _mm256_fmadd_pd(a, b, c); }
-inline __m256i ifma(__m256i a, __m256i b, __m256i c) { return _mm256_add_epi32(c, _mm256_mullo_epi32(a, b)); }
+__m256  sfma(__m256 a, __m256 b, __m256 c)   ;
+__m256d dfma(__m256d a, __m256d b, __m256d c);
+__m256i ifma(__m256i a, __m256i b, __m256i c);
 #else  // No FMA
-inline __m256  sfma(__m256 a, __m256 b, __m256 c)    { return _mm256_add_ps(c, _mm256_mul_ps(a, b)); }
-inline __m256d dfma(__m256d a, __m256d b, __m256d c) { return _mm256_add_pd(c, _mm256_mul_pd(a, b)); }
-inline __m256i ifma(__m256i a, __m256i b, __m256i c) { return _mm256_add_epi32(c, _mm256_mullo_epi32(a, b)); }
+__m256  sfma(__m256 a, __m256 b, __m256 c)   ;
+__m256d dfma(__m256d a, __m256d b, __m256d c);
+__m256i ifma(__m256i a, __m256i b, __m256i c);
 #endif // AVX, FMA
 #endif              /* INSTLEVEL */
 
@@ -159,11 +146,6 @@ void qpack_panelA(const int8_t* A, int8_t* packed_A, const int mr,
  *          Hardware Optimization
  *                                                      
 *********************************************************/
-
-/**
- * Get cache information especially cache size.
- * This only cares about data cache and also L1 to L3.
- */
 void show_cache(size_t* cache_size);
 void get_cache_size(size_t* cache_size);
 void set_block_size(size_t* cache_size, const int NTHREADS,

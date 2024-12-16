@@ -27,15 +27,15 @@ void spack_panelB(const float* B, float* packed_B, const int nr,
             packed_B[Bp_row * NC + Bp_col] = B[Bp_row * N + Bp_col];
         }
         // for (int Bp_col = nr; Bp_col < 16; Bp_col++) {
-            // *packed_B++ = 0;
+        //     *packed_B++ = 0;
         // }
     }
 }
 
 void spack_panelA(const float* A, float* packed_A, const int mr, 
                 const int kc, const int KC, const int K) {
-    for(int Ap_row = 0; Ap_row < mr; Ap_row++) {    /* row access */
-        for(int Ap_col = 0; Ap_col < kc; Ap_col++) {   /* col access */
+    for(int Ap_row = 0; Ap_row < mr; Ap_row++) {    
+        for(int Ap_col = 0; Ap_col < kc; Ap_col++) {   
             packed_A[Ap_row * KC + Ap_col] = A[Ap_row * K + Ap_col];
         }
         // for (int i = mr; i < 6; i++) {

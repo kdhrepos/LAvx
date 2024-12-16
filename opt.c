@@ -1,5 +1,9 @@
 #include "gemm.h"
 
+/**
+ * Get cache information especially cache size.
+ * This only cares about data cache and also L1 to L3.
+ */
 void get_cache_size(size_t* cache_size) { 
     memset(cache_size, 0, sizeof(size_t) * 32);
 

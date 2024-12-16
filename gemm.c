@@ -3,7 +3,7 @@
 void sgemm(const float* A, const float* B, float* C,
         const int M, const int N, const int K) {
 
-#if INSTLEVEL >= 8 /* AVX512F */
+#if INSTLEVEL >= 8    /* AVX512F */
     int MR = 14, NR = 32;
 #elif INSTLEVEL >= 6  /* AVX, AVX2 */
     int MR = 6,  NR = 16;
@@ -30,7 +30,7 @@ void sgemm(const float* A, const float* B, float* C,
                     for(int Bb_col = 0; Bb_col < nc; Bb_col += NR) {    /* 2nd loop */
                         const int nr = min(NR, nc - Bb_col);
                         const int mr = min(MR, mc - Ab_row);
-                        s_kernel(&packed_A[Ab_row * KC], &packed_B[Bb_col], 
+                        skernel(&packed_A[Ab_row * KC], &packed_B[Bb_col], 
                         &C[((Am_row + Ab_row) * N) + (Bm_col + Bb_col)], mr, kc, KC, nr, NC, N);
                     }
                 }
@@ -45,7 +45,7 @@ void sgemm(const float* A, const float* B, float* C,
 void dgemm(const double* A, const double* B, double* C,
         const int M, const int N, const int K) {
 
-#if INSTLEVEL >= 8 /* AVX512F */
+#if INSTLEVEL >= 8    /* AVX512F */
     int MR = 6, NR = 16;
 #elif INSTLEVEL >= 6  /* AVX, AVX2 */
     int MR = 6, NR = 8;
@@ -72,7 +72,7 @@ void dgemm(const double* A, const double* B, double* C,
                     for(int Bb_col = 0; Bb_col < nc; Bb_col += NR) {    /* 2nd loop */
                         const int nr = min(NR, nc - Bb_col);
                         const int mr = min(MR, mc - Ab_row);
-                        d_kernel(&packed_A[Ab_row * KC], &packed_B[Bb_col], 
+                        dkernel(&packed_A[Ab_row * KC], &packed_B[Bb_col], 
                         &C[((Am_row + Ab_row) * N) + (Bm_col + Bb_col)], mr, kc, KC, nr, NC, N);
                     }
                 }
@@ -87,7 +87,7 @@ void dgemm(const double* A, const double* B, double* C,
 void igemm(const int* A, const int* B, int* C,
            const int M, const int N, const int K) {
 
-#if INSTLEVEL >= 8 /* AVX512F */
+#if INSTLEVEL >= 8    /* AVX512F */
     int MR = 14, NR = 32;
 #elif INSTLEVEL >= 6  /* AVX, AVX2 */
     int MR = 6,  NR = 16;
@@ -114,7 +114,7 @@ void igemm(const int* A, const int* B, int* C,
                     for(int Bb_col = 0; Bb_col < nc; Bb_col += NR) {        /* 1st loop */
                         const int nr = min(NR, nc - Bb_col);
                         const int mr = min(MR, mc - Ab_row);
-                        i_kernel(&packed_A[Ab_row * KC], &packed_B[Bb_col], 
+                        ikernel(&packed_A[Ab_row * KC], &packed_B[Bb_col], 
                         &C[((Am_row + Ab_row) * N) + (Bm_col + Bb_col)], mr, kc, KC, nr, NC, N);
                     }
                 }
@@ -129,7 +129,7 @@ void igemm(const int* A, const int* B, int* C,
 void hqgemm(const int16_t* A, const int16_t* B, int16_t* C,
            const int M, const int N, const int K) {
 
-#if INSTLEVEL >= 9 /* AVX512BW */
+#if INSTLEVEL >= 9    /* AVX512BW */
     int MR = 30, NR = 32;
 #elif INSTLEVEL >= 7  /* AVX2 */
     int MR = 6,  NR = 16;
@@ -156,7 +156,7 @@ void hqgemm(const int16_t* A, const int16_t* B, int16_t* C,
                     for(int Bb_col = 0; Bb_col < nc; Bb_col += NR) {        /* 1st loop */
                         const int nr = min(NR, nc - Bb_col);
                         const int mr = min(MR, mc - Ab_row);
-                        hq_kernel(&packed_A[Ab_row * KC], &packed_B[Bb_col], 
+                        hqkernel(&packed_A[Ab_row * KC], &packed_B[Bb_col], 
                         &C[((Am_row + Ab_row) * N) + (Bm_col + Bb_col)], mr, kc, KC, nr, NC, N);
                     }
                 }
@@ -171,7 +171,7 @@ void hqgemm(const int16_t* A, const int16_t* B, int16_t* C,
 void qgemm(const int8_t* A, const int8_t* B, int8_t* C,
            const int M, const int N, const int K) {
 
-#if INSTLEVEL >= 9 /* AVX512BW */
+#if INSTLEVEL >= 9    /* AVX512BW */
     int MR = 30, NR = 32;
 #elif INSTLEVEL >= 7  /* AVX2 */
     int MR = 6,  NR = 16;
@@ -198,7 +198,7 @@ void qgemm(const int8_t* A, const int8_t* B, int8_t* C,
                     for(int Bb_col = 0; Bb_col < nc; Bb_col += NR) {        /* 1st loop */
                         const int nr = min(NR, nc - Bb_col);
                         const int mr = min(MR, mc - Ab_row);
-                        q_kernel(&packed_A[Ab_row * KC], &packed_B[Bb_col], 
+                        qkernel(&packed_A[Ab_row * KC], &packed_B[Bb_col], 
                         &C[((Am_row + Ab_row) * N) + (Bm_col + Bb_col)], mr, kc, KC, nr, NC, N);
                     }
                 }

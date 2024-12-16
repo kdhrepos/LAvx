@@ -30,7 +30,9 @@
 
 // TODO: Define another macros (or not...?)
  #ifndef INSTLEVEL
-  #if defined (__AVX512BW__) /* && defined (__AVX512VL__) */
+  #if defined (__AVX512VNNI__)
+     #define INSTLEVEL 10
+  #elif defined (__AVX512BW__) /* && defined (__AVX512VL__) */
      #define INSTLEVEL 9
   #elif defined (__AVX512F__) || defined (__AVX512__)
      #define INSTLEVEL 8
