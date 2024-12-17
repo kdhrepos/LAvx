@@ -153,6 +153,8 @@ void hqgemm(const int16_t* A, const int16_t* B, int16_t* C,
     int MR = 30, NR = 32;
 #elif INSTLEVEL >= 7  /* AVX2 */
     int MR = 6,  NR = 16;
+#elif INSTLEVEL >= 6
+    int MR = 6,  NR = 16;
 #endif
 
     int MC, KC, NC;
@@ -194,6 +196,8 @@ void qgemm(const int8_t* A, const int8_t* B, int8_t* C,
 #if INSTLEVEL >= 9    /* AVX512BW */
     int MR = 30, NR = 32;
 #elif INSTLEVEL >= 7  /* AVX2 */
+    int MR = 6,  NR = 16;
+#elif INSTLEVEL >= 6
     int MR = 6,  NR = 16;
 #endif
 

@@ -6,7 +6,7 @@
  * Description: 
  *      This header file determines whether SIMD extensions can be used or not.
  *      If a certain extension can be used, then INSTLEVEL is added up.
- *      All the necessary Intel SIMD instrinsics depend on this [INSTLEVEL] macro.
+ *      All the necessary Intel SIMD instrinsics depend on [INSTLEVEL] macro.
  * 
  * Reference:
  *    https://github.com/vectorclass/version2/blob/master/instrset.h
@@ -25,33 +25,18 @@
  #elif defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__))
      /* GCC-compatible compiler, targeting x86/x86-64 */
      #include <x86intrin.h>
-// #elif defined(__GNUC__) && defined(__ARM_NEON__)
-//      /* GCC-compatible compiler, targeting ARM with NEON */
-//      #include <arm_neon.h>
-// #elif defined(__GNUC__) && defined(__IWMMXT__)
-//      /* GCC-compatible compiler, targeting ARM with WMMX */
-     // #include <mmintrin.h>
-// #elif (defined(__GNUC__) || defined(__xlC__)) && (defined(__VEC__) || defined(__ALTIVEC__))
-//      /* XLC or GCC-compatible compiler, targeting PowerPC with VMX/VSX */
-//      #include <altivec.h>
-// #elif defined(__GNUC__) && defined(__SPE__)
-//      /* GCC-compatible compiler, targeting PowerPC with SPE */
-//      #include <spe.h>
  #endif
 
 // The following values of INSTRSET are currently defined:
 // 2:  SSE2
 // 3:  SSE3
-// 4:  SSSE3
-// 5:  SSE4.1
-// 6:  SSE4.2
-// 7:  AVX
-// 8:  AVX2
-// 9:  AVX512F
-// 10: AVX512BW/DQ/VL
-// In the future, INSTRSET = 11 may include AVX512VBMI and AVX512VBMI2, but this
-// decision cannot be made before the market situation for CPUs with these
-// instruction sets is better known
+// 4:  SSE4.1
+// 5:  SSE4.2
+// 6:  AVX
+// 7:  AVX2
+// 8:  AVX512F
+// 9:  AVX512BW
+// 10: AVX512VNNI
 
 // TODO: Define another macros (or not...?)
  #ifndef INSTLEVEL

@@ -358,28 +358,28 @@ void ikernel(const int* packed_blockA, const int* packed_blockB, int* C,
         b1_blockB = _mm256_loadu_si256((__m256i_u*)(packed_blockB + 8));
 
         a_blockA = _mm256_set1_epi32(packed_blockA[KC * 0]);
-        packed_C[0][0] = ifma(a_blockA, b0_blockB, packed_C[0][0]); /* FMA */
-        packed_C[0][1] = ifma(a_blockA, b1_blockB, packed_C[0][1]); /* FMA */
+        packed_C[0][0] = ifma(a_blockA, b0_blockB, packed_C[0][0]);
+        packed_C[0][1] = ifma(a_blockA, b1_blockB, packed_C[0][1]);
 
         a_blockA = _mm256_set1_epi32(packed_blockA[KC * 1]);
-        packed_C[1][0] = ifma(a_blockA, b0_blockB, packed_C[1][0]); /* FMA */
-        packed_C[1][1] = ifma(a_blockA, b1_blockB, packed_C[1][1]); /* FMA */
+        packed_C[1][0] = ifma(a_blockA, b0_blockB, packed_C[1][0]);
+        packed_C[1][1] = ifma(a_blockA, b1_blockB, packed_C[1][1]);
 
         a_blockA = _mm256_set1_epi32(packed_blockA[KC * 2]);
-        packed_C[2][0] = ifma(a_blockA, b0_blockB, packed_C[2][0]); /* FMA */
-        packed_C[2][1] = ifma(a_blockA, b1_blockB, packed_C[2][1]); /* FMA */
+        packed_C[2][0] = ifma(a_blockA, b0_blockB, packed_C[2][0]);
+        packed_C[2][1] = ifma(a_blockA, b1_blockB, packed_C[2][1]);
 
         a_blockA = _mm256_set1_epi32(packed_blockA[KC * 3]);
-        packed_C[3][0] = ifma(a_blockA, b0_blockB, packed_C[3][0]); /* FMA */
-        packed_C[3][1] = ifma(a_blockA, b1_blockB, packed_C[3][1]); /* FMA */
+        packed_C[3][0] = ifma(a_blockA, b0_blockB, packed_C[3][0]);
+        packed_C[3][1] = ifma(a_blockA, b1_blockB, packed_C[3][1]);
 
         a_blockA = _mm256_set1_epi32(packed_blockA[KC * 4]);
-        packed_C[4][0] = ifma(a_blockA, b0_blockB, packed_C[4][0]); /* FMA */
-        packed_C[4][1] = ifma(a_blockA, b1_blockB, packed_C[4][1]); /* FMA */
+        packed_C[4][0] = ifma(a_blockA, b0_blockB, packed_C[4][0]);
+        packed_C[4][1] = ifma(a_blockA, b1_blockB, packed_C[4][1]);
 
         a_blockA = _mm256_set1_epi32(packed_blockA[KC * 5]);
-        packed_C[5][0] = ifma(a_blockA, b0_blockB, packed_C[5][0]); /* FMA */
-        packed_C[5][1] = ifma(a_blockA, b1_blockB, packed_C[5][1]); /* FMA */
+        packed_C[5][0] = ifma(a_blockA, b0_blockB, packed_C[5][0]);
+        packed_C[5][1] = ifma(a_blockA, b1_blockB, packed_C[5][1]);
 
         packed_blockA += 1;     /* next column */
         packed_blockB += NC;    /* next 16 elements*/
@@ -389,8 +389,72 @@ void ikernel(const int* packed_blockA, const int* packed_blockB, int* C,
         _mm256_maskstore_epi32(&C[r * N + 8], packed_mask[1], packed_C[r][1]);
     }
 #elif INSTLEVEL >= 6 /* AVX */
-// TODO: implement with SSE instructions
-// since there are no useful int32 instructions in AVX extension
+    __m128i packed_C[6][4]; /* 6x16 */
+    __m128i a_blockA;
+    __m128i b0_blockB, b1_blockB, b2_blockB, b3_blockB;
+    int8_t mask0, mask1, mask2, mask3;
+    mask0 = (n < 4)   ? 0xF >> (4 - n)  : 0xF;
+    mask1 = (n >= 4)  ? (n >= 8)  ? 0xF : 0xF >> (8 - n)  : 0x0;
+    mask2 = (n >= 8)  ? (n >= 12) ? 0xF : 0xF >> (12 - n) : 0x0;
+    mask3 = (n >= 12) ? 0xF >> (16 - n) : 0x0;
+
+    for (int r = 0; r < m; r++) {
+        packed_C[r][0] = maskload(&C[r * N + 0],  mask0);
+        packed_C[r][1] = maskload(&C[r * N + 4],  mask1);
+        packed_C[r][2] = maskload(&C[r * N + 8],  mask2);
+        packed_C[r][3] = maskload(&C[r * N + 12], mask3);
+    }
+    for(int k = 0; k < kc; k++) {
+        b0_blockB = _mm_load_si128((__m128i_u*)(packed_blockB + 0));
+        b1_blockB = _mm_load_si128((__m128i_u*)(packed_blockB + 4));
+        b2_blockB = _mm_load_si128((__m128i_u*)(packed_blockB + 8));
+        b3_blockB = _mm_load_si128((__m128i_u*)(packed_blockB + 12));
+
+        a_blockA = _mm_set1_epi32(packed_blockA[KC * 0]);
+        packed_C[0][0] = ifma(a_blockA, b0_blockB, packed_C[0][0]);
+        packed_C[0][1] = ifma(a_blockA, b1_blockB, packed_C[0][1]);
+        packed_C[0][2] = ifma(a_blockA, b2_blockB, packed_C[0][2]);
+        packed_C[0][3] = ifma(a_blockA, b3_blockB, packed_C[0][3]);
+
+        a_blockA = _mm_set1_epi32(packed_blockA[KC * 1]);
+        packed_C[1][0] = ifma(a_blockA, b0_blockB, packed_C[1][0]);
+        packed_C[1][1] = ifma(a_blockA, b1_blockB, packed_C[1][1]);
+        packed_C[1][2] = ifma(a_blockA, b2_blockB, packed_C[1][2]);
+        packed_C[1][3] = ifma(a_blockA, b3_blockB, packed_C[1][3]);
+
+        a_blockA = _mm_set1_epi32(packed_blockA[KC * 2]);
+        packed_C[2][0] = ifma(a_blockA, b0_blockB, packed_C[2][0]);
+        packed_C[2][1] = ifma(a_blockA, b1_blockB, packed_C[2][1]);
+        packed_C[2][2] = ifma(a_blockA, b2_blockB, packed_C[2][2]);
+        packed_C[2][3] = ifma(a_blockA, b3_blockB, packed_C[2][3]);
+
+        a_blockA = _mm_set1_epi32(packed_blockA[KC * 3]);
+        packed_C[3][0] = ifma(a_blockA, b0_blockB, packed_C[3][0]);
+        packed_C[3][1] = ifma(a_blockA, b1_blockB, packed_C[3][1]);
+        packed_C[3][2] = ifma(a_blockA, b2_blockB, packed_C[3][2]);
+        packed_C[3][3] = ifma(a_blockA, b3_blockB, packed_C[3][3]);
+
+        a_blockA = _mm_set1_epi32(packed_blockA[KC * 4]);
+        packed_C[4][0] = ifma(a_blockA, b0_blockB, packed_C[4][0]);
+        packed_C[4][1] = ifma(a_blockA, b1_blockB, packed_C[4][1]);
+        packed_C[4][2] = ifma(a_blockA, b2_blockB, packed_C[4][2]);
+        packed_C[4][3] = ifma(a_blockA, b3_blockB, packed_C[4][3]);
+
+        a_blockA = _mm_set1_epi32(packed_blockA[KC * 5]);
+        packed_C[5][0] = ifma(a_blockA, b0_blockB, packed_C[5][0]);
+        packed_C[5][1] = ifma(a_blockA, b1_blockB, packed_C[5][1]);
+        packed_C[5][2] = ifma(a_blockA, b2_blockB, packed_C[5][2]);
+        packed_C[5][3] = ifma(a_blockA, b3_blockB, packed_C[5][3]);
+        
+        packed_blockA += 1;     /* next column */
+        packed_blockB += NC;    /* next 16 elements*/
+    }
+    for (int r = 0; r < m; r++) {
+        maskstore(&C[r * N + 0],  mask0, packed_C[r][0]);
+        maskstore(&C[r * N + 4],  mask1, packed_C[r][1]);
+        maskstore(&C[r * N + 8],  mask2, packed_C[r][2]);
+        maskstore(&C[r * N + 12], mask3, packed_C[r][3]);
+    }
 #endif // ikernel
 }
 
