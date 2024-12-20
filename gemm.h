@@ -69,29 +69,27 @@ __m512i qmul(__m512i a, __m512i b);
 
 /* FMA */
 #if INSTLEVEL >= 9   /* AVX512BW */
-#if defined (__AVX512BW__) && (defined (__AVX512__) || defined (__AVX512F__))
-__m512  sfma(__m512 a, __m512 b, __m512 c)   ;
-__m512d dfma(__m512d a, __m512d b, __m512d c);
-__m512i ifma(__m512i a, __m512i b, __m512i c);
-__m512i qfma(__m512i a, __m512i b, __m512i c);
-#endif
-#elif INSTLEVEL >= 8 /* AVX512 */
 #if defined (__AVX512__) || defined (__AVX512F__)
 __m512  sfma(__m512 a, __m512 b, __m512 c)   ;
 __m512d dfma(__m512d a, __m512d b, __m512d c);
 __m512i ifma(__m512i a, __m512i b, __m512i c);
-#endif // AVX512F
+#endif
+__m512i qfma(__m512i a, __m512i b, __m512i c);
+#elif INSTLEVEL >= 8 /* AVX512F */
+__m512  sfma(__m512 a, __m512 b, __m512 c)   ;
+__m512d dfma(__m512d a, __m512d b, __m512d c);
+__m512i ifma(__m512i a, __m512i b, __m512i c);
 #elif INSTLEVEL >= 7 /* AVX2 */
 #if defined (__FMA__)
-__m256  sfma(__m256 a, __m256 b, __m256 c)   ;
-__m256d dfma(__m256d a, __m256d b, __m256d c);
+__m256  sfma(__m256 a, __m256 b, __m256 c)   ;  
+__m256d dfma(__m256d a, __m256d b, __m256d c); 
 __m256i ifma(__m256i a, __m256i b, __m256i c);
 #else  // No FMA
-__m256  sfma(__m256 a, __m256 b, __m256 c)   ;
+__m256  sfma(__m256 a, __m256 b, __m256 c)   ;  
 __m256d dfma(__m256d a, __m256d b, __m256d c);
 __m256i ifma(__m256i a, __m256i b, __m256i c);
-#endif // AVX, FMA
-#elif INSTLEVEL >= 6 /* AVX*/
+#endif // AVX2, FMA
+#elif INSTLEVEL >= 6 /* AVX */
 #if defined (__FMA__)
 __m256  sfma(__m256 a, __m256 b, __m256 c)   ;
 __m256d dfma(__m256d a, __m256d b, __m256d c);
