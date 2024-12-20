@@ -466,7 +466,7 @@ void print_console(const int M, const int K, const int N, const int niter,
                    const double* exec_time, const double* gflops, const BOOL is_valid_gemm) {
     printf("════════════════════════════════════════════════\n\n");
     printf("A: %dx%d B: %dx%d C: %dx%d\n\n", M, K, K, N, M, N);
-    printf("DGEMM Test on %d Iterations\n", niter);
+    printf("GEMM Test on %d Iterations\n", niter);
     printf("%s\n\n", (is_valid_gemm == TRUE) ? "[Valid GEMM]" : "[Invalid GEMM!]");
 
     printf("AVG Exec. Time: %5.3lfms\n",     exec_time[0] / niter);
@@ -482,10 +482,17 @@ void print_console(const int M, const int K, const int N, const int niter,
 void print_file(const int M, const int K, const int N, const int niter,
                    const double* exec_time, const double* gflops, 
                    const BOOL is_valid_gemm, FILE* file) {
-    fprintf(file, "C = A x B\n");
-    fprintf(file, "M:%d, K:%d, N:%d\n", M, K, N);
-    fprintf(file, "Exec. Time: AVX\t MAX\t MIN\n");
-    fprintf(file, "%7.3lf %7.3lf %7.3lf\n", exec_time[0] / niter, exec_time[1] ,exec_time[2]);
-    fprintf(file, "GFPS      : AVX\t MAX\t MIN\n");
-    fprintf(file, "%7.3lf %7.3lf %7.3lf", gflops[0] / niter, gflops[1] ,gflops[2]);
+    fprintf(file, "════════════════════════════════════════════════\n\n");
+    fprintf(file, "A: %dx%d B: %dx%d C: %dx%d\n\n", M, K, K, N, M, N);
+    fprintf(file, "GEMM Test on %d Iterations\n", niter);
+    fprintf(file, "%s\n\n", (is_valid_gemm == TRUE) ? "[Valid GEMM]" : "[Invalid GEMM!]");
+
+    fprintf(file, "AVG Exec. Time: %5.3lfms\n",     exec_time[0] / niter);
+    fprintf(file, "MAX Exec. Time: %5.3lfms\n",     exec_time[1]);
+    fprintf(file, "MIN Exec. Time: %5.3lfms\n\n",   exec_time[2]);
+
+    fprintf(file, "AVG GFLOPS : %5.3lf\n",   gflops[0] / niter);
+    fprintf(file, "MAX GFLOPS : %5.3lf\n",   gflops[1]);
+    fprintf(file, "MIN GFLOPS : %5.3lf\n\n", gflops[2]);
+    fprintf(file, "════════════════════════════════════════════════\n");
 }
